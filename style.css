@@ -1,0 +1,227 @@
+/* Styling for merged roles within a single company */
+.main-company-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eaeaea;
+}
+
+.company-name {
+    font-size: 1.4em !important;
+    color: #2c3e50 !important;
+}
+
+.role-entry {
+    margin-bottom: 25px;
+    padding-left: 15px;
+    border-left: 2px solid #0056b3; /* Visual cue for nested roles */
+}
+
+.role-entry:last-child {
+    margin-bottom: 0;
+}
+
+.role-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.role-title-group h4 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #0056b3;
+}
+
+.role-location {
+    font-size: 0.85em;
+    color: #777;
+    display: block;
+}
+
+/* Adjust the existing badge to look good in sub-headers */
+.role-entry .timeline-badge {
+    font-size: 0.8em;
+    padding: 4px 12px;
+}
+
+/* Core Page Settings */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Navigation Menu */
+nav {
+    background: #f4f4f4;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: bold;
+}
+nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #0056b3;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Header and Profile */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.profile-pic {
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+.social-icons a {
+    margin: 0 10px;
+    display: inline-block;
+}
+.social-icons img {
+    vertical-align: middle;
+}
+
+/* Typography and Formatting */
+h1, h2, h3 {
+    color: #2c3e50;
+}
+h2 {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+    margin-top: 30px;
+}
+ul, ol {
+    margin-bottom: 20px;
+}
+.highlight {
+    color: rgb(0,100,0);
+    font-weight: bold;
+}
+
+/* Modern Grid Layout (Replaces your old table) */
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+@media (min-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+.grid-item {
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+}
+/* --- Advanced Timeline Layout --- */
+.advanced-timeline {
+    position: relative;
+    padding-left: 30px;
+    margin-top: 30px;
+}
+
+/* The continuous vertical track line */
+.advanced-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: #eaeaea;
+    border-radius: 2px;
+}
+
+.timeline-block {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+/* The connecting dots on the timeline */
+.timeline-dot {
+    position: absolute;
+    left: -37.5px; /* Centers the dot perfectly on the vertical line */
+    top: 25px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #0056b3;
+    border: 4px solid #f9f9f9;
+    box-shadow: 0 0 0 3px #0056b3;
+}
+
+/* The shaded gray card (matches your other grid items) */
+.timeline-content {
+    background: #f9f9f9; /* Soft gray background */
+    border: 1px solid #eaeaea; /* Light border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.03); /* Very subtle drop shadow */
+}
+
+/* Header layout: Logo/Name on Left, Date on Right */
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap; /* Allows the date to wrap neatly on mobile phones */
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px dashed #eaeaea;
+}
+
+/* Side-by-side Logo and Text */
+.school-branding {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.school-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain; /* Prevents the logo from stretching */
+    background: white; /* Adds a white background if the logo has transparent parts */
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.school-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+    color: #0056b3;
+}
+
+.school-info h4 {
+    margin: 0;
+    color: #555;
+    font-weight: 500;
+}
+
+/* The stylized Date Badge */
+.timeline-badge {
+    background: #eef5fc;
+    color: #0056b3;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+    border: 1px solid #cce0f5;
+    display: inline-block;
+    white-space: nowrap;
+}
