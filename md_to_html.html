@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Post | Arghya Bhattacharya</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <style>
+        /* Add some basic spacing for the rendered markdown */
+        #markdown-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        #markdown-content h1, #markdown-content h2 { color: #333; }
+        #markdown-content pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        #markdown-content code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body class="artichoke-bg"> <nav>
+        <a href="index.html">Home</a>
+        <a href="experience.html">Work Experience</a>
+        <a href="publications.html">Publications & Talks</a>
+        <a href="projects.html">Projects & Extras</a>
+        <a href="blogs.html">Blogs & About</a>
+    </nav>
+
+    <main>
+        <div style="max-width: 800px; margin: 0 auto 20px auto;">
+            <a href="javascript:history.back()" style="text-decoration: none; color: #0277bd;">&larr; Back</a>
+        </div>
+
+        <div id="markdown-content">
+            Loading post...
+        </div>
+    </main>
+
+    <script>
+        // Extract the file path from the URL (e.g., ?file=blogs/broken_anda/post.md)
+        const urlParams = new URLSearchParams(window.location.search);
+        const postFile = urlParams.get('file');
+
+        const contentDiv = document.getElementById('markdown-content');
+
+        if (postFile) {
+            // Fetch the markdown file
+            fetch(postFile)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Could not find the article.");
+                    }
+                    return response.text();
+                })
+                .then(markdownText => {
+                    // Convert markdown to HTML and inject it into the div
+                    contentDiv.innerHTML = marked.parse(markdownText);
+                })
+                .catch(error => {
+                    contentDiv.innerHTML = `<h2>Oops!</h2><p>Sorry, we couldn't load this post. Please check the URL.</p>`;
+                    console.error("Error fetching markdown:", error);
+                });
+        } else {
+            contentDiv.innerHTML = `<h2>No post specified.</h2><p>Please select an article from the blog page.</p>`;
+        }
+    </script>
+
+</body>
+</html>
