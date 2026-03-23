@@ -29,6 +29,18 @@
     margin-bottom: 10px;
 }
 
+.role-title-group {
+    flex: 1; 
+}
+
+.role-meta {
+    display: flex;
+    flex-direction: column;  /* Stacks them vertically */
+    align-items: flex-start; /* Aligns them both to the left */
+    gap: 4px;                /* Gives them a little breathing room */
+    margin-top: 2px;
+}
+
 .role-title-group h4 {
     margin: 0;
     font-size: 1.1em;
@@ -190,6 +202,7 @@ ul, ol {
     display: flex;
     align-items: center;
     gap: 20px;
+    flex: 1;
 }
 
 .school-logo {
@@ -199,6 +212,25 @@ ul, ol {
     background: white; /* Adds a white background if the logo has transparent parts */
     border-radius: 4px;
     padding: 2px;
+}
+
+.school-info {
+    flex: 1;
+}
+
+.school-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Ensures it stacks cleanly on small mobile screens */
+    gap: 15px;
+    margin-top: 2px;
+}
+
+/* Styling for the new advisor text */
+.advisor-text {
+    font-size: 0.9em;
+    color: #777; /* Matches your existing .role-location color */
 }
 
 .school-info h3 {
@@ -213,6 +245,24 @@ ul, ol {
     font-weight: 500;
 }
 
+/* 1. Make the primary Job Titles identical */
+.school-info h3, 
+.role-title-group h4 {
+    font-size: 1.15em; /* A nice middle-ground size */
+    color: #0056b3;
+    margin: 0 0 2px 0; /* Ensures the spacing below the title is the same */
+    font-weight: 600;
+}
+
+/* 2. Make the Location / Company subtitles identical */
+.role-location {
+    font-size: 0.9em; 
+    color: #555;
+    font-weight: 500;
+    margin: 0;
+    display: block; 
+}
+
 /* The stylized Date Badge */
 .timeline-badge {
     background: #eef5fc;
@@ -224,4 +274,109 @@ ul, ol {
     border: 1px solid #cce0f5;
     display: inline-block;
     white-space: nowrap;
+}
+
+/* =========================================
+   BLOG SHARED STYLES
+   ========================================= */
+.blog-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 40px 20px;
+}
+
+/* =========================================
+   AN ARTICHOKE OF ALGORITHM (Tech Blog)
+   ========================================= */
+.artichoke-bg {
+    background-color: #f8f9fa; /* Cool, light gray */
+}
+
+.category-divider {
+    border: 0;
+    height: 1px;
+    background: #ccc;
+    margin: 30px 0;
+}
+
+.tech-post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tech-post {
+    display: flex;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    align-items: center;
+    gap: 20px;
+}
+
+.code-teaser {
+    background: #282c34;
+    color: #abb2bf;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    min-width: 150px;
+}
+
+.tech-tag {
+    font-family: 'Courier New', Courier, monospace;
+    background: #e1f5fe;
+    color: #0277bd;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    margin-right: 5px;
+}
+
+/* =========================================
+   BROKEN ANDA (Personal Blog)
+   ========================================= */
+.broken-anda-bg {
+    background-color: #fdfbf7; /* Warm, off-white/cream */
+}
+
+.serif-title {
+    font-family: 'Georgia', serif;
+    color: #4a3b32;
+}
+
+.featured-post {
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+/* CSS Column-based Masonry for articles */
+.masonry-grid {
+    column-count: 2;
+    column-gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .masonry-grid {
+        column-count: 1;
+    }
+    .tech-post {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.masonry-item {
+    break-inside: avoid;
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
