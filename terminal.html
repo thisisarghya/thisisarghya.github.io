@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Terminal Demo</title>
+    <style>
+        /* Base page styling for the demo */
+        body { font-family: 'Segoe UI', sans-serif; padding: 50px; background: #f8f9fa; overflow-x: hidden; color: #333; }
+        #main-portfolio { max-width: 800px; margin: 0 auto; transition: all 2.5s cubic-bezier(0.55, 0.085, 0.68, 0.53); }
+        
+        /* The CSS class that triggers the chaos */
+        .gravity-fall { transform: translateY(2000px) rotate(15deg); opacity: 0; }
+
+        /* --- NEW INSTRUCTION BOX --- */
+        .terminal-instructions {
+            background-color: #f1f3f4; /* Google light gray */
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 5px solid #4285F4; /* Google blue accent */
+            margin-bottom: 20px;
+            font-size: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .terminal-instructions code {
+            background-color: #e8eaed;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #db4437; /* Red accent for commands */
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        /* --- EMBEDDED TERMINAL STYLES --- */
+        #terminal-wrapper {
+            position: relative; /* Now sits normally in the page flow */
+            width: 100%;
+            height: 350px; /* Fixed height for the widget */
+            background-color: #121212;
+            border-radius: 8px; /* Rounded corners for embedded look */
+            color: #0f0; /* Classic hacker green */
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #terminal-output {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
+            scrollbar-width: thin;
+            scrollbar-color: #333 #121212;
+        }
+
+        .terminal-line { 
+            display: flex; 
+            padding: 0 20px 20px 20px; 
+            align-items: center; 
+        }
+        
+        .prompt { color: #0f9d58; margin-right: 10px; font-weight: bold; white-space: nowrap; }
+        
+        #terminal-input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            flex-grow: 1;
+            outline: none;
+            caret-color: #0f0;
+        }
+
+        .error-text { color: #db4437; } 
+        .system-text { color: #f4b400; } 
+    </style>
+</head>
+<body>
+
+    <!-- Wrapped everything in an ID so the rm -rf command still has something to drop -->
+    <div id="main-portfolio">
+        
+        <h2>Welcome To Arghya's Terminal</h2>
+
+        <!-- The Gray Instruction Blob -->
+        <div class="terminal-instructions">
+            👋🏻 <strong>Hello Linux Geek! This is a system terminal for you to know about me. I am granting you terminal access:</strong> Interact with the system directly. Try typing commands like <code>help</code>, <code>whoami</code>, <code>whoareu</code>, <code>cat skills.txt</code>, <code>cat experiences.txt</code>, <code>cat education.txt</code>, <code>sudo hire</code>, or the forbidden <code>exit</code>.
+        </div>
+
+        <!-- The Embedded Terminal -->
+        <div id="terminal-wrapper">
+            <div id="terminal-output">Welcome to ArghyaOS v0.0.1.
+Type 'help' for a list of available commands.</div>
+            <div class="terminal-line">
+                <span class="prompt">guest@arghya-server:~$</span>
+                <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+
+    </div>
+
+<script>
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+        const portfolioContent = document.getElementById('main-portfolio');
+        // Add window.parent so it targets the main webpage, not the iframe
+        // const portfolioContent = window.parent.document.getElementById('main-portfolio');
+
+        // Allow clicking anywhere inside the terminal box to focus the input field
+        document.getElementById('terminal-wrapper').addEventListener('click', () => {
+            terminalInput.focus();
+        });
+
+        terminalInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const command = terminalInput.value.trim();
+                terminalInput.value = ''; // Clear input
+                
+                if (command !== '') {
+                    processCommand(command);
+                } else {
+                    // NEW: If the input is empty, just print a new prompt line
+                    printToOutput(`<span class="prompt">guest@arghya-server:~$</span>`);
+                }
+            }
+        });
+
+        // The Logic Engine
+        function processCommand(command) {
+            // Echo the command to the output screen first
+            printToOutput(`<span class="prompt">guest@arghya-server:~$</span> ${command}`);
+
+            const cmdLower = command.toLowerCase();
+
+            switch (cmdLower) {
+                case 'help':
+                    printToOutput(`Available commands:
+  <span class="system-text">whoareu</span>             - Display host system identity
+  <span class="system-text">whoami</span>              - Display current user info
+  <span class="system-text">cat experiences.txt</span> - Output chronological work history
+  <span class="system-text">cat education.txt</span>   - Output academic background
+  <span class="system-text">cat skills.txt</span>      - Output system capabilities
+  <span class="system-text">sudo hire</span>           - Initiate recruitment protocol
+  <span class="system-text">clear</span>               - Clear the terminal screen
+  <span class="system-text">exit</span>                - Close the terminal session`);
+                    break;
+
+                case 'whoareu':
+                    printToOutput("I am Arghya Bhattacharya.\nCurrent Position: Software Engineer III (L4) at Google Cloud, Seattle, WA, USA.\nCurrent Mission: Building large-scale cloud computing infrastructure and Bare Metal solutions.\nFormal Training: I have a Ph.D. in Computer Science from Stony Brook University at New York. I studied under Prof. Michael A. Bender.");
+                    break;
+
+                case 'whoami':
+                    printToOutput("User: guest\nStatus: Potential recruiter or curious developer.\nLocation: Currently inspecting the portfolio of a Googler.");
+                    break;
+
+                case 'cat experiences.txt':
+                    printToOutput(`Loading chronological history...
+[Jul 2016] Consultant, Technology Consulting @ PricewaterhouseCoopers (PwC) India
+[May 2018] Research Engineer @ National University of Singapore
+[Sep 2018] Research Assistant / Teaching Assistant / WISE Mentor @ Stony Brook University
+[Jun 2022] Cloud and Networking Intern @ Nokia Bell Labs
+[May 2023] Software Engineering Ph.D. Intern @ YouTube
+[Sep 2023] Visiting Research Student Intern @ Lawrence Berkeley National Lab
+[Sep 2024] Software Engineer III (L4) @ Google Cloud`);
+                    break;
+
+                case 'cat education.txt':
+                    printToOutput(`Loading academic records...
+[Undergraduate] B.Eng. in Electrical Engineering
+Institution: Jadavpur University, Kolkata
+
+[Doctorate] Ph.D. in Computer Science
+Institution: Stony Brook University, New York
+Thesis: "Going Beyond Worst-Case: A Study on Cache Adaptivity and Machine Learning Advice"`);
+                    break;
+
+                case 'cat skills.txt':
+                    printToOutput("Loading core modules...\n[OK] C++\n[OK] Python\n[OK] Bash Scripting\n[OK] SQL\n[OK] Parallel Algorithms\n[OK] Networking Systems Design");
+                    break;
+
+                case 'sudo hire':
+                    printToOutput('<span class="system-text">Authorizing recruitment protocol... Access granted.</span>\n\nReach out directly:\n📧 Email: <a href="mailto:arghyabh@google.com" style="color:#4285F4; text-decoration:none;">arghyabh@google.com</a>\n🔗 LinkedIn: <a href="https://www.linkedin.com/in/reach-arghya-bhattacharya/" target="_blank" style="color:#4285F4; text-decoration:none;">Connect with me</a>');
+                    
+                    // NEW: Automatically triggers the default mail app to open
+                    window.location.href = "mailto:arghyabh@google.com?subject=Hello Arghya, we'd love to connect!";
+                    break;
+
+                case 'clear':
+                    terminalOutput.innerHTML = '';
+                    break;
+
+                case 'exit':
+                    printToOutput('<span class="error-text">CRITICAL SYSTEM SHUTDOWN. Gravity matrix offline. Brace for impact.</span>');
+                    portfolioContent.classList.add('gravity-fall');
+                    
+                    // NEW: Wipes the screen and shows a giant refresh prompt after 2 seconds
+                    setTimeout(() => {
+                        document.body.innerHTML = `
+                            <div style="display: flex; height: 100vh; justify-content: center; align-items: center; font-family: sans-serif; flex-direction: column; background: #f8f9fa;">
+                                <h1 style="color: #db4437; font-size: 50px; margin: 0;">System offline after exit.</h1>
+                                <p style="font-size: 20px; color: #666;">Please refresh the page to restore your session and go back to Arghya's webpage.</p>
+                            </div>
+                        `;
+                    }, 2000); 
+                    break;
+
+                default:
+                    printToOutput(`bash: ${command}: command not found. Type 'help' to see available commands.`);
+            }
+        }
+
+        // Helper to append text and auto-scroll to the bottom
+        function printToOutput(text) {
+            terminalOutput.innerHTML += `\n${text}\n`;
+            // Force scroll to bottom so the newest text is always visible
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+    </script>
+</body>
+</html>
