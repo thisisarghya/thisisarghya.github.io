@@ -2,8 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Work Experience - Arghya Bhattacharya</title>
     <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Scoped wrapper so it doesn't mess up your whole page's width/scrolling */
+        .timeline-widget-wrapper {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin: 40px 0;
+            scrollbar-width: none; 
+            background-color: #f1f3f4; 
+            border-radius: 16px; 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.03); 
+        }
+        .timeline-widget-wrapper::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 50%;
+            left: 50px;
+            height: 4px;
+            background-color: #4285F4;
+            width: 0;
+            transition: width 0.5s linear;
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+
+        .timeline-node {
+            position: relative;
+            min-width: 220px;
+            height: 100%; 
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+        }
+
+        .timeline-node.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 4px solid #4285F4;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 3;
+        }
+
+        .timeline-node-content {
+            position: absolute;
+            width: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            border-top: 4px solid #4285F4;
+        }
+
+        .timeline-node-content h3 { margin: 0 0 5px 0; font-size: 16px; color: #333; }
+        .timeline-node-content h4 { margin: 0 0 10px 0; font-size: 13px; color: #666; font-weight: normal; }
+        .timeline-node-content span { font-size: 12px; font-weight: bold; color: #0f9d58; background: #e6f4ea; padding: 4px 8px; border-radius: 12px; }
+
+        /* Alternating layouts */
+        .timeline-node:nth-child(odd) .timeline-node-content { bottom: 40px; }
+        .timeline-node:nth-child(odd) .timeline-node-content::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            border-width: 10px 10px 0; border-style: solid; border-color: white transparent transparent transparent;
+        }
+
+        .timeline-node:nth-child(even) .timeline-node-content { top: 40px; border-top: none; border-bottom: 4px solid #db4437; }
+        .timeline-node:nth-child(even) .timeline-dot { border-color: #db4437; }
+        .timeline-node:nth-child(even) .timeline-node-content::after {
+            content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            border-width: 0 10px 10px; border-style: solid; border-color: transparent transparent white transparent;
+        }
+
+        /* Update the bottom spacing */
+        .timeline-node:nth-child(odd) .timeline-node-content { 
+            bottom: calc(50% + 25px); 
+        }
+
+        /* Update the top spacing */
+        .timeline-node:nth-child(even) .timeline-node-content { 
+            top: calc(50% + 25px); 
+            border-top: none; 
+            border-bottom: 4px solid #db4437; 
+        }
+    </style>
 </head>
 <body>
 
@@ -14,289 +122,364 @@
     <a href="projects.html">Projects & Extras</a>
     <a href="blogs.html">Blogs & About</a>
 </nav>
+
 <main>
-<h2>Work Experience</h2>
+    <h2>Career Overview</h2>
 
-<div class="advanced-timeline">
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-<div class="school-branding main-company-header">
-    <img src="images/google.jpg" alt="Google Logo" class="school-logo">
-    <div class="school-info">
-        <h3 class="company-name"><a href="https://about.google">Google</a></h3>
-    </div>
-</div>
-
-<div class="role-entry">
-<div class="role-header">
-    <div class="role-title-group">
-        <h4>Software Engineer III (L4), Google Cloud</h4>
-        <div class="role-meta">
-            <span class="role-location">Seattle, WA, USA</span>
-            <span class="advisor-text"><strong>Manager:</strong> <a href="https://www.linkedin.com/in/vicky-xu/"> Vicky Xu</a></span>
+    <div class="timeline-widget-wrapper" id="timelineContainer">
+        <div class="progress-line" id="progressLine"></div>
         </div>
-    </div>
-    <div class="timeline-badge">Sep 2024 &mdash; Present</div>
-</div>
-<ul style="list-style-type:square">
-    <li><b>Bare Metal Cloud Infrastructure:</b> I engineer Google Cloud Platform (GCP) solutions to develop, maintain, and operationalize Bare Metal cloud solutions for demanding applications. The Google Computing Engine (GCE) Node Bare Metal servers allow users to run specialized high-performance computing (HPC) workloads, e.g., third-party virtualization software, applications with low-level access to the server, applications with ultra-low-latenct (ULL) networking requirements, computationally demanding AI workloads, etc. Our team manages the regionally distributed cluster of servers with high-performance connection with a low-latency network fabric.</li>
-    <ul style="list-style-type:square">
-        <li>I worked on the first arm-based bare metal shape Google Cloud developed in 2025-2026. Here is a <a href="https://cloud.google.com/blog/products/compute/new-axion-c4a-metal-offers-bare-metal-performance-on-arm?e=48754805">Google Cloud Blog</a> as the public announcement of of the product.</li>
-    </ul>
-    <li><b>AI tooling:</b> I made a small sub-team of 4 engineers and led the development of an agentic AI tool to resolve issues for a tier-2 oncall (with SLO of 30 minutes) for GCE Bare Metal team.</li>
-    <li><b>Hackathon:</b> I led a small sub-team of 4 engineers for a hackathon entry for AI2 hackathon with an early version of the oncall AI tool.</li>
-    <li><b>Volunteer:</b> I took ~20 <b>Google Champion calls</b> (mock interviews).</li>
-</ul>
-</div>
 
-<div class="role-entry">
-<div class="role-header">
-    <div class="role-title-group">
-        <h4>Software Engineering Ph.D. Intern, YouTube</h4>
-        <div class="role-meta">
-            <span class="role-location">San Bruno, CA, USA</span>
-            <span class="advisor-text"><strong>Hosts:</strong> <a href="https://www.linkedin.com/in/jeremyzhou123/"> Dr. Jie (Jeremy) Zhou</a> and <a href="https://www.linkedin.com/in/kevin-hsieh-chung-chen-66306b38/"> Dr. Kevin Chen</a></span>
-        </div>
-    </div>
-    <div class="timeline-badge">May 2023 &mdash; Aug 2023</div>
-</div>
-<ul style="list-style-type:square">
-    <li><b>UVQ for YouTube Shorts:</b> I collaborated closely with the playback experience, media algorithms, transcoding, and edge streaming teams and extended UVQ to YouTube Shorts. As part of this work, I evaluated multiple ML models through A/B testing to comprehend subjective perception of video quality and learn from contextual factors (such as content type, device type, geolocation, and other streaming objectives). Here is a <a href="https://research.google/blog/uvq-measuring-youtubes-perceptual-video-quality/"> Google Research Blog</a> that introduces UVQ model.</li>
-    <li><b>Intern Learning:</b> Personal Branding, Fundamentals of Innovation, Impactful Performance Writing.</li>
-    <li><b>Volunteer:</b> I helped job seekers by reviewing their resume.</li>
-</ul>
-</div>
-</div>
-</div>
+    <h2>Work Experience</h2>
 
+    <div class="advanced-timeline">
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="school-branding main-company-header">
+                    <img src="images/google.jpg" alt="Google Logo" class="school-logo">
+                    <div class="school-info">
+                        <h3 class="company-name"><a href="https://about.google">Google</a></h3>
+                    </div>
+                </div>
 
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-<div class="school-branding main-company-header">
-    <img src="images/stonybrook.png" alt="Stony Brook Logo" class="school-logo">
-    <div class="school-info">
-        <h3 class="company-name"><a href="https://www.stonybrook.edu">Stony Brook University</a></h3>
-    </div>
-</div>
+                <div class="role-entry">
+                    <div class="role-header">
+                        <div class="role-title-group">
+                            <h4>Software Engineer III (L4), Google Cloud</h4>
+                            <div class="role-meta">
+                                <span class="role-location">Seattle, WA, USA</span>
+                                <span class="advisor-text"><strong>Manager:</strong> <a href="https://www.linkedin.com/in/vicky-xu/"> Vicky Xu</a></span>
+                            </div>
+                        </div>
+                        <div class="timeline-badge">Sep 2024 &mdash; Present</div>
+                    </div>
+                    <ul style="list-style-type:square">
+                        <li><b>Bare Metal Cloud Infrastructure:</b> I engineer Google Cloud Platform (GCP) solutions to develop, maintain, and operationalize Bare Metal cloud solutions for demanding applications. The Google Computing Engine (GCE) Node Bare Metal servers allow users to run specialized high-performance computing (HPC) workloads, e.g., third-party virtualization software, applications with low-level access to the server, applications with ultra-low-latency (ULL) networking requirements, computationally demanding AI workloads, etc. Our team manages the regionally distributed cluster of servers with high-performance connection with a low-latency network fabric.</li>
+                        <ul style="list-style-type:square">
+                            <li>I worked on the first arm-based bare metal shape Google Cloud developed in 2025-2026. Here is a <a href="https://cloud.google.com/blog/products/compute/new-axion-c4a-metal-offers-bare-metal-performance-on-arm?e=48754805">Google Cloud Blog</a> as the public announcement of the product C4A Metal.</li>
+                        </ul>
+                        <li><b>AI Tooling:</b> I made a small sub-team of 4 engineers and led the development of an agentic AI tool to resolve issues for a tier-2 oncall (with SLO of 30 minutes) for GCE Bare Metal team.</li>
+                        <li><b>Hackathon:</b> I led a small sub-team of 4 engineers for a hackathon entry for AI2 hackathon with an early version of the oncall AI tool.</li>
+                        <li><b>Volunteer:</b> I took ~20 <b>Google Champion calls</b> (mock interviews).</li>
+                    </ul>
+                </div>
 
-<div class="role-entry">
-<div class="role-header">
-    <div class="role-title-group">
-        <h4>Research Project Assistant</h4>
-        <div class="role-meta">
-            <span class="role-location">Stony Brook, NY, USA</span>
-            <span class="advisor-text"><strong>Advisor:</strong> <a href="https://www3.cs.stonybrook.edu/~bender/"> Prof. Michael A. Bender</a></span>
-        </div>
-    </div>
-    <div class="timeline-badge">Jun 2019 — Dec 2022</div>
-</div>
-<ul style="list-style-type:square">
-    <li><b>Cache-efficient algorithms:</b> I designed an empirical framework to evaluate when programs are cache- and memory-adaptive for external memory applications. These programs maintain good performance despite memory fluctuations, which are typically found in multicore, multithreaded, shared-memory, and cloud systems. I provided an algorithm design principle and reference implementation for cache-adaptive algorithms to solve large external-memory problem instances for fundamental problems such as cubic-time matrix multiplication, sorting, and dynamic programming algorithm for the longest common subsequence (LCS). </li>
-    <ul style="list-style-type:square">
-        <li> Check out our paper in <a href="https://doi.org/10.4230/LIPIcs.ESA.2022.16"> 30th Annual European Symposium on Algorithms (ESA 2022)</a></li>
-    </ul>
-    <li><b>Machine-learning augmentation:</b> I redesigned traditional online algorithms rent-or-buy problems with augmentation by single and multiple ML oracles accounting for arbitrarily fluctuating discounts on the rent of the resource. In the subsequent work, I revisited conventional online decision-making problems, such as list access problem, job scheduling problem, secretary selection problems, and green and parallel paging problem.</li>
-    <ul style="list-style-type:square">
-        <li>Check out our paper at <a href="https://doi.org/10.1007/978-3-030-96731-4_18"> 16th International Conference and Workshops on Algorithms and Computation (WALCOM 2022)</a> and our article at <a href="https://doi.org/10.1016/j.tcs.2022.10.006"> Elsevier Theoretical Computer Science</a>.</li>
-        <li>Check out our poster at <a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf"> SIGMETRICS 2023</a>.
-    </ul>
-
-    <li><b>Filesystem aging:</b> I collaborated with a large group of researchers, engineers, and professors to evaluate the degradation of read performance across five production filesystems, <i>ext4, btrfs, xfs, zfs, and f2fs</i>, owing to poor data layout and disk fullness. This evaluation, conducted using microbenchmarks and application-level fragmentation benchmarks, demonstrated that the degradation could be mitigated with a $B^{\varepsilon}$-tree-based write-optimized in-kernel filesystem like <i>BetrFS</i>. 
-    <ul style="list-style-type:square">
-        <li>Check out our article on <a href="https://arxiv.org/abs/2401.08858"> ArXiv</a>.</li>
-    </ul>
-</ul>
-</div>
-
-<div class="role-entry">
-<div class="role-header">
-    <div class="role-title-group">
-        <h4>Mentor, High School Women in Science and Engineering (HS-WISE)</h4>
-        <div class="role-meta">
-            <span class="role-location">Stony Brook, NY, USA</span>
-            <span class="advisor-text"><strong>Supervisor:</strong> <a href="https://www.linkedin.com/in/jacquelyn-gatta-8020909a/"> Jacquelyn Gatta</a></span>
-        </div>
-    </div>
-    <div class="timeline-badge">Sep 2019 - Apr 2023</div>
-</div>
-<ul style="list-style-type:square">
-    <li>Lessons: Basics of Probability and Thinking Algorithmically.</li>
-    <li>I mentored high-school students across Long Island, NY and encouraged them to pursue a career in science and engineering.</li>
-    <ul style="list-style-type:square">
-        <li>Shoreham-Wading River High School (2019-20).</li>
-        <li>Comsewogue High School (2020-21).</li> 
-        <li>Hauppauge High School (2021-22).</li>
-        <li>Bellport High School (2022-23).</li>
-    </ul>
-    <li> Check out <a href="docs/Recommendation from Jacquelyn Gatta for Arghya Bhattacharya.pdf"> the recommendation letter</a> I received from the Program Director of WISE at Stony Brook, Jacquelyn Gatta.
-</ul>
-</div>
-
-<div class="role-entry">
-<div class="role-header">
-    <div class="role-title-group">
-        <h4>Graduate Teaching Assistant</h4>
-        <span class="role-location">Stony Brook, NY, USA</span>
-    </div>
-    <div class="timeline-badge">Sep 2018 — Apr 2023</div>
-</div>
-<ul style="list-style-type:square">
-    <li>Graded papers and homework assignments, proctored exams, and took weekly office hours.</li>
-    <ul style="list-style-type:square">
-        <li>Theory of Database Systems (CSE 532) in Spring 2023 under Prof. Fusheng Wang.</li>
-        <li>System Fundamentals - II (CSE 320) for Spring 2019 under Prof. Eugene Stark.</li> 
-        <li>Fundamentals of Information Technology (ISE 218) in Fall 2018 under Prof. Kevin McDonnell.</li>
-    </ul>
-</ul>
-</div>
-</div>
-</div>
-
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-    <div class="timeline-header">
-        <div class="school-branding">
-            <img src="images/berkeleylab.jpg" alt="Berkeley Lab Logo" class="school-logo">
-            <div class="school-info">
-                <h3>Visiting Research Student Intern</h3>
-                <h4><a href="https://www.lbl.gov/">Lawrence Berkeley National Laboratory</a> | Berkeley, CA, USA</h4>
-            </div>
-        </div>
-        <div class="timeline-badge">Sep 2023 &mdash; Dec 2023</div>
-    </div>
-    <ul style="list-style-type:square">
-        <li><b>Dynamic GAP:</b> I designed an experimental framework to study the performance of external-memory algorithms (APIs) for large sparse dynamic graphs.</li>
-    </ul>
-</div>
-</div>
-
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-    <div class="timeline-header">
-        <div class="school-branding">
-            <img src="images/belllabs.png" alt="Nokia Logo" class="school-logo">
-            <div class="school-info">
-                <h3>Cloud and Networking Intern</h3>
-                <h4><a href="https://www.bell-labs.com">Nokia Bell Labs</a> | Murray Hill, NJ, USA</h4>
-                <span class="advisor-text"><strong>Hosts:</strong> <a href="https://www.researchgate.net/scientific-contributions/Edward-Grinshpun-2081780222"> Dr. Edward Grinshpun</a> and Chuck Payette</span>
-            </div>
-        </div>
-        <div class="timeline-badge">Jun 2022 &mdash; Aug 2022</div>
-    </div>
-    <ul style="list-style-type:square">
-        <li><b>Augmenting L4S with predictions:</b> I researched out-of-band ML-based prediction-enhanced congestion control algorithms tailored for low-latency, high-volume, variable-bitrate applications, such as live video streaming, within 5G wireless network systems.</li>
-        <ul style="list-style-type:square">
-            <li>Here is <a href="docs/talks/Arghya-Bell-Labs-Talk.pdf"> a talk I gave</a> explaining my work at a high level.</li>
-        </ul>
-        <li><b>Intern Learning:</b> I completed Harvard ManageMentor Leading People by Harvard Business Publishing and End-to-End 5G Networking by Nokia Bell Labs.</li>
-    </ul>
-</div>
-</div>
-
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-    <div class="timeline-header">
-        <div class="school-branding">
-            <img src="images/nus.jpg" alt="NUS Logo" class="school-logo">
-            <div class="school-info">
-                <h3>Research Engineer</h3>
-                <h4><a href="https://nus.edu.sg">National University of Singapore</a> | Singapore</h4>
-                <span class="advisor-text"><strong>Manager:</strong> <a href="https://www.ece.nus.edu.sg/gems/profhome.html"> Prof. Dipti Srinivasan</a></span>
-            </div>
-        </div>
-        <div class="timeline-badge">May 2018 &mdash; Aug 2018</div>
-    </div>
-    <ul style="list-style-type:square">
-        <li>I reviewed the performance of Multi Objective Evolutionary Algorithm based on Decomposition (MOEAD) techniques experimentally using Matlab.</li>
-    </ul>
-</div>
-</div>
-
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-    <div class="timeline-header">
-        <div class="school-branding">
-            <img src="images/pwc.png" alt="PwC Logo" class="school-logo">
-            <div class="school-info">
-                <h3>Consultant, Technology Consulting</h3>
-                <h4><a href="https://www.pwc.in">Pricewaterhouse Coopers India</a> | Kolkata, WB, India</h4>
-                <span class="advisor-text"><strong>Manager:</strong> <a href="https://www.linkedin.com/in/sudipt0sarkar/?originalSubdomain=in"> Sudipto Sarkar</a></span>
-            </div>
-        </div>
-        <div class="timeline-badge">Jul 2016 &mdash; Sep 2017</div>
-    </div>
-    <ul style="list-style-type:square">
-        <li>I was involved in onsite visits for requirement gathering, and engaging with client for system co-design. I co-led the technical development of an ERP solution. The system aimed to streamline buisness processes and generate reports for finance, procurement, and inventory management for an international client in the power generation and distribution sector.</li>
-        <li>I built a payroll automation system using DotNet technologies using MVC architecture.</li>
-        <li><b>Volunteer activities:</b> I took active roles of speaker and reviewer at the Toastmasters International Club at PwC India.</li>
-    </ul>
-</div>
-</div>
-
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-    <div class="timeline-header">
-        <div class="school-branding">
-            <img src="images/jadavpur.png" alt="Jadavpur Logo" class="school-logo">
-            <div class="school-info">
-                <h3>Undergraduate Research Assistant</h3>
-                <h4><a href="http://www.jaduniv.edu.in">Jadavpur University</a> | Kolkata, WB, India</h4>
-                <span class="advisor-text"><strong>Advisor:</strong> <a href="https://www.linkedin.com/in/debangshu-dey-a575b45a/?originalSubdomain=in"> Prof. Debangshu Dey</a></span>
-
-            </div>
-        </div>
-        <div class="timeline-badge">Jun 2015 &mdash; May 2016</div>
-    </div>
-    <ul style="list-style-type:square">
-        <li>I researched on image and video processing and designed algorithms for affective computing and programmed a methodology to detect emotion. We studied Bi-dimensional Empirical Mode Decomposition (BEMD) based feature extraction, Principle Component Analysis (PCA), Linear Discriminant Analysis (LDA) based dimensionality reduction, Gray-level Co-occurrence Matrix (GLCM), Histogram of Oriented Gradients (HOG), Local Ternary Pattern (LTP) based feature elimination, and Multi-class Support Vector Machine (MSVM), k-Nearest Neighbor (kNN) based classification. We did the empirical evaluation on 3 datasets (JAFFE, Cohn–Kanade, and eNTERFACE) using Matlab.</li>
-        <ul style="list-style-type:square">
-            <li>Check out our <a href="https://doi.org/10.1109/CMI.2016.7413766"> initial paper</a> and the <a href="https://doi.org/10.1007/s00500-016-2395-4"> follow up article in Springer Soft Computing</a>.</li>
-        </ul>
-        <li>I designed algorithms for biomedical image processing and cancer detection using optical colonoscopy videos by cross-wavelet feature extraction.</li>
-    </ul>
-</div>
-</div>
-
-<div class="timeline-block">
-<div class="timeline-dot"></div>
-<div class="timeline-content">
-    <div class="timeline-header">
-        <div class="school-branding">
-            <img src="images/iitkgp.png" alt="IIT Logo" class="school-logo">
-            <div class="school-info">
-                <h3>Undergraduate Summer Intern</h3>
-                <div class="school-meta">
-                    <h4><a href="http://www.iitkgp.ac.in">IIT Kharagpur</a> | Kharagpur, WB, India</h4>
-                    <span class="advisor-text"><strong>Advisor:</strong> <a href="http://www.facweb.iitkgp.ac.in/~jay/"> Prof. Jayanta Mukhopadhyay</a></span>
+                <div class="role-entry">
+                    <div class="role-header">
+                        <div class="role-title-group">
+                            <h4>Software Engineering Ph.D. Intern, YouTube</h4>
+                            <div class="role-meta">
+                                <span class="role-location">San Bruno, CA, USA</span>
+                                <span class="advisor-text"><strong>Hosts:</strong> <a href="https://www.linkedin.com/in/jeremyzhou123/"> Dr. Jie (Jeremy) Zhou</a> and <a href="https://www.linkedin.com/in/kevin-hsieh-chung-chen-66306b38/"> Dr. Kevin Chen</a></span>
+                            </div>
+                        </div>
+                        <div class="timeline-badge">May 2023 &mdash; Aug 2023</div>
+                    </div>
+                    <ul style="list-style-type:square">
+                        <li><b>UVQ for YouTube Shorts:</b> I collaborated closely with the playback experience, media algorithms, transcoding, and edge streaming teams and extended UVQ to YouTube Shorts. As part of this work, I evaluated multiple ML models through A/B testing to comprehend subjective perception of video quality and learn from contextual factors (such as content type, device type, geolocation, and other streaming objectives). Here is a <a href="https://research.google/blog/uvq-measuring-youtubes-perceptual-video-quality/"> Google Research Blog</a> that introduces the UVQ model.</li>
+                        <li><b>Intern Learning:</b> Personal Branding, Fundamentals of Innovation, Impactful Performance Writing.</li>
+                        <li><b>Volunteer:</b> I helped job seekers by reviewing their resume.</li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="timeline-badge">Jun 2014 &mdash; Aug 2014</div>
-    </div>
-    <ul style="list-style-type:square">
-        <li>I designed a portable electronic device for non-invasive continuous measurement of blood pressure.</li>
-    </ul>
-</div>
-</div>
-</div>
 
-<h2>Hackathons</h2>
-<ul>
-    <li><span style="color:red;">Team Lead and Presenter</span>, Bare Metal and Memory-optimized VM Oncall AI Agent at AI2 Hackathon, Google</li>
-    <li><span style="color:red;">Speaker and Mentor</span>, Hack@CEWIT'23, Workshop: Is this idea a "winner winner, chicken dinner"?</li>
-    <li><span style="color:red;">Mentor</span>, SBUHack'22</li>
-    <li><span style="color:red;">Winner: Best Hack and Best Domain</span>, Hack@CEWIT'22, Cryptopiens</li>
-    <li><span style="color:red;">Winner: Best Security Hack</span>, SBUHack'21, Steganography Attack</li>
-    <li><span style="color:red;">Winner: SparkHACK'15</span>, presented by Dept. of Elec Engg, Jadavpur University and NASSCOM</li>
-    <li><span style="color:red;">Winner: Best Pitching</span>, Glocal Camtech Jugaad-a-thon 2014, Tattle-tale Pillbox</li>
-    <li><span style="color:red;">Third position</span>, CIRCUISTIC 1.0, CONVOLUTION 2014, Dept. of Elec Engg, Jadavpur University</li>
-</ul>
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="school-branding main-company-header">
+                    <img src="images/stonybrook.png" alt="Stony Brook Logo" class="school-logo">
+                    <div class="school-info">
+                        <h3 class="company-name"><a href="https://www.stonybrook.edu">Stony Brook University</a></h3>
+                    </div>
+                </div>
+
+                <div class="role-entry">
+                    <div class="role-header">
+                        <div class="role-title-group">
+                            <h4>Research Project Assistant</h4>
+                            <div class="role-meta">
+                                <span class="role-location">Stony Brook, NY, USA</span>
+                                <span class="advisor-text"><strong>Advisor:</strong> <a href="https://www3.cs.stonybrook.edu/~bender/"> Prof. Michael A. Bender</a></span>
+                            </div>
+                        </div>
+                        <div class="timeline-badge">Jun 2019 — Dec 2022</div>
+                    </div>
+                    <ul style="list-style-type:square">
+                        <li><b>Cache-efficient algorithms:</b> I designed an empirical framework to evaluate when programs are cache- and memory-adaptive for external memory applications. These programs maintain good performance despite memory fluctuations, which are typically found in multicore, multithreaded, shared-memory, and cloud systems. I provided an algorithm design principle and reference implementation for cache-adaptive algorithms to solve large external-memory problem instances for fundamental problems such as cubic-time matrix multiplication, sorting, and dynamic programming algorithm for the longest common subsequence (LCS). </li>
+                        <ul style="list-style-type:square">
+                            <li> Check out our paper in <a href="https://doi.org/10.4230/LIPIcs.ESA.2022.16"> 30th Annual European Symposium on Algorithms (ESA 2022)</a></li>
+                        </ul>
+                        <li><b>Machine-learning augmentation:</b> I redesigned traditional online algorithms rent-or-buy problems with augmentation by single and multiple ML oracles accounting for arbitrarily fluctuating discounts on the rent of the resource. In the subsequent work, I revisited conventional online decision-making problems, such as list access problem, job scheduling problem, secretary selection problems, and green and parallel paging problem.</li>
+                        <ul style="list-style-type:square">
+                            <li>Check out our paper at <a href="https://doi.org/10.1007/978-3-030-96731-4_18"> 16th International Conference and Workshops on Algorithms and Computation (WALCOM 2022)</a> and our article at <a href="https://doi.org/10.1016/j.tcs.2022.10.006"> Elsevier Theoretical Computer Science</a>.</li>
+                            <li>Check out our poster at <a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf"> SIGMETRICS 2023</a>.</li>
+                        </ul>
+                        <li><b>Filesystem aging:</b> I collaborated with a large group of researchers, engineers, and professors to evaluate the degradation of read performance across five production filesystems, <i>ext4, btrfs, xfs, zfs, and f2fs</i>, owing to poor data layout and disk fullness. This evaluation, conducted using microbenchmarks and application-level fragmentation benchmarks, demonstrated that the degradation could be mitigated with a $B^{\varepsilon}$-tree-based write-optimized in-kernel filesystem like <i>BetrFS</i>. 
+                        <ul style="list-style-type:square">
+                            <li>Check out our article on <a href="https://arxiv.org/abs/2401.08858"> ArXiv</a>.</li>
+                        </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="role-entry">
+                    <div class="role-header">
+                        <div class="role-title-group">
+                            <h4>Mentor, High School Women in Science and Engineering (HS-WISE)</h4>
+                            <div class="role-meta">
+                                <span class="role-location">Stony Brook, NY, USA</span>
+                                <span class="advisor-text"><strong>Supervisor:</strong> <a href="https://www.linkedin.com/in/jacquelyn-gatta-8020909a/"> Jacquelyn Gatta</a></span>
+                            </div>
+                        </div>
+                        <div class="timeline-badge">Sep 2019 - Apr 2023</div>
+                    </div>
+                    <ul style="list-style-type:square">
+                        <li>Lessons: Basics of Probability and Thinking Algorithmically.</li>
+                        <li>I mentored high-school students across Long Island, NY and encouraged them to pursue a career in science and engineering.</li>
+                        <ul style="list-style-type:square">
+                            <li>Shoreham-Wading River High School (2019-20).</li>
+                            <li>Comsewogue High School (2020-21).</li> 
+                            <li>Hauppauge High School (2021-22).</li>
+                            <li>Bellport High School (2022-23).</li>
+                        </ul>
+                        <li> Check out <a href="docs/Recommendation from Jacquelyn Gatta for Arghya Bhattacharya.pdf"> the recommendation letter</a> I received from the Program Director of WISE at Stony Brook, Jacquelyn Gatta.</li>
+                    </ul>
+                </div>
+
+                <div class="role-entry">
+                    <div class="role-header">
+                        <div class="role-title-group">
+                            <h4>Graduate Teaching Assistant</h4>
+                            <span class="role-location">Stony Brook, NY, USA</span>
+                        </div>
+                        <div class="timeline-badge">Sep 2018 — Apr 2023</div>
+                    </div>
+                    <ul style="list-style-type:square">
+                        <li>Graded papers and homework assignments, proctored exams, and took weekly office hours.</li>
+                        <ul style="list-style-type:square">
+                            <li>Theory of Database Systems (CSE 532) in Spring 2023 under Prof. Fusheng Wang.</li>
+                            <li>System Fundamentals - II (CSE 320) for Spring 2019 under Prof. Eugene Stark.</li> 
+                            <li>Fundamentals of Information Technology (ISE 218) in Fall 2018 under Prof. Kevin McDonnell.</li>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <div class="school-branding">
+                        <img src="images/berkeleylab.jpg" alt="Berkeley Lab Logo" class="school-logo">
+                        <div class="school-info">
+                            <h3>Visiting Research Student Intern</h3>
+                            <h4><a href="https://www.lbl.gov/">Lawrence Berkeley National Laboratory</a> | Berkeley, CA, USA</h4>
+                        </div>
+                    </div>
+                    <div class="timeline-badge">Sep 2023 &mdash; Dec 2023</div>
+                </div>
+                <ul style="list-style-type:square">
+                    <li><b>Dynamic GAP:</b> I designed an experimental framework to study the performance of external-memory algorithms (APIs) for large sparse dynamic graphs.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <div class="school-branding">
+                        <img src="images/belllabs.png" alt="Nokia Logo" class="school-logo">
+                        <div class="school-info">
+                            <h3>Cloud and Networking Intern</h3>
+                            <h4><a href="https://www.bell-labs.com">Nokia Bell Labs</a> | Murray Hill, NJ, USA</h4>
+                            <span class="advisor-text"><strong>Hosts:</strong> <a href="https://www.researchgate.net/scientific-contributions/Edward-Grinshpun-2081780222"> Dr. Edward Grinshpun</a> and Chuck Payette</span>
+                        </div>
+                    </div>
+                    <div class="timeline-badge">Jun 2022 &mdash; Aug 2022</div>
+                </div>
+                <ul style="list-style-type:square">
+                    <li><b>Augmenting L4S with predictions:</b> I researched out-of-band ML-based prediction-enhanced congestion control algorithms tailored for low-latency, high-volume, variable-bitrate applications, such as live video streaming, within 5G wireless network systems.</li>
+                    <ul style="list-style-type:square">
+                        <li>Here is <a href="docs/talks/Arghya-Bell-Labs-Talk.pdf"> a talk I gave</a> explaining my work at a high level.</li>
+                    </ul>
+                    <li><b>Intern Learning:</b> I completed Harvard ManageMentor Leading People by Harvard Business Publishing and End-to-End 5G Networking by Nokia Bell Labs.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <div class="school-branding">
+                        <img src="images/nus.jpg" alt="NUS Logo" class="school-logo">
+                        <div class="school-info">
+                            <h3>Research Engineer</h3>
+                            <h4><a href="https://nus.edu.sg">National University of Singapore</a> | Singapore</h4>
+                            <span class="advisor-text"><strong>Manager:</strong> <a href="https://www.ece.nus.edu.sg/gems/profhome.html"> Prof. Dipti Srinivasan</a></span>
+                        </div>
+                    </div>
+                    <div class="timeline-badge">May 2018 &mdash; Aug 2018</div>
+                </div>
+                <ul style="list-style-type:square">
+                    <li>I reviewed the performance of Multi Objective Evolutionary Algorithm based on Decomposition (MOEAD) techniques experimentally using Matlab.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <div class="school-branding">
+                        <img src="images/pwc.png" alt="PwC Logo" class="school-logo">
+                        <div class="school-info">
+                            <h3>Consultant, Technology Consulting</h3>
+                            <h4><a href="https://www.pwc.in">Pricewaterhouse Coopers India</a> | Kolkata, WB, India</h4>
+                            <span class="advisor-text"><strong>Manager:</strong> <a href="https://www.linkedin.com/in/sudipt0sarkar/?originalSubdomain=in"> Sudipto Sarkar</a></span>
+                        </div>
+                    </div>
+                    <div class="timeline-badge">Jul 2016 &mdash; Sep 2017</div>
+                </div>
+                <ul style="list-style-type:square">
+                    <li>I was involved in onsite visits for requirement gathering, and engaging with client for system co-design. I co-led the technical development of an ERP solution. The system aimed to streamline buisness processes and generate reports for finance, procurement, and inventory management for an international client in the power generation and distribution sector.</li>
+                    <li>I built a payroll automation system using DotNet technologies using MVC architecture.</li>
+                    <li><b>Volunteer activities:</b> I took active roles of speaker and reviewer at the Toastmasters International Club at PwC India.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <div class="school-branding">
+                        <img src="images/jadavpur.png" alt="Jadavpur Logo" class="school-logo">
+                        <div class="school-info">
+                            <h3>Undergraduate Research Assistant</h3>
+                            <h4><a href="http://www.jaduniv.edu.in">Jadavpur University</a> | Kolkata, WB, India</h4>
+                            <span class="advisor-text"><strong>Advisor:</strong> <a href="https://www.linkedin.com/in/debangshu-dey-a575b45a/?originalSubdomain=in"> Prof. Debangshu Dey</a></span>
+                        </div>
+                    </div>
+                    <div class="timeline-badge">Jun 2015 &mdash; May 2016</div>
+                </div>
+                <ul style="list-style-type:square">
+                    <li>I researched on image and video processing and designed algorithms for affective computing and programmed a methodology to detect emotion. We studied Bi-dimensional Empirical Mode Decomposition (BEMD) based feature extraction, Principle Component Analysis (PCA), Linear Discriminant Analysis (LDA) based dimensionality reduction, Gray-level Co-occurrence Matrix (GLCM), Histogram of Oriented Gradients (HOG), Local Ternary Pattern (LTP) based feature elimination, and Multi-class Support Vector Machine (MSVM), k-Nearest Neighbor (kNN) based classification. We did the empirical evaluation on 3 datasets (JAFFE, Cohn–Kanade, and eNTERFACE) using Matlab.</li>
+                    <ul style="list-style-type:square">
+                        <li>Check out our <a href="https://doi.org/10.1109/CMI.2016.7413766"> initial paper</a> and the <a href="https://doi.org/10.1007/s00500-016-2395-4"> follow up article in Springer Soft Computing</a>.</li>
+                    </ul>
+                    <li>I designed algorithms for biomedical image processing and cancer detection using optical colonoscopy videos by cross-wavelet feature extraction.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="timeline-block">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <div class="school-branding">
+                        <img src="images/iitkgp.png" alt="IIT Logo" class="school-logo">
+                        <div class="school-info">
+                            <h3>Undergraduate Summer Intern</h3>
+                            <div class="school-meta">
+                                <h4><a href="http://www.iitkgp.ac.in">IIT Kharagpur</a> | Kharagpur, WB, India</h4>
+                                <span class="advisor-text"><strong>Advisor:</strong> <a href="http://www.facweb.iitkgp.ac.in/~jay/"> Prof. Jayanta Mukhopadhyay</a></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-badge">Jun 2014 &mdash; Aug 2014</div>
+                </div>
+                <ul style="list-style-type:square">
+                    <li>I designed a portable electronic device for non-invasive continuous measurement of blood pressure.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h2>Hackathons</h2>
+    <ul>
+        <li><span style="color:red;">Team Lead and Presenter</span>, Bare Metal and Memory-optimized VM Oncall AI Agent at AI2 Hackathon, Google</li>
+        <li><span style="color:red;">Speaker and Mentor</span>, Hack@CEWIT'23, Workshop: Is this idea a "winner winner, chicken dinner"?</li>
+        <li><span style="color:red;">Mentor</span>, SBUHack'22</li>
+        <li><span style="color:red;">Winner: Best Hack and Best Domain</span>, Hack@CEWIT'22, Cryptopiens</li>
+        <li><span style="color:red;">Winner: Best Security Hack</span>, SBUHack'21, Steganography Attack</li>
+        <li><span style="color:red;">Winner: SparkHACK'15</span>, presented by Dept. of Elec Engg, Jadavpur University and NASSCOM</li>
+        <li><span style="color:red;">Winner: Best Pitching</span>, Glocal Camtech Jugaad-a-thon 2014, Tattle-tale Pillbox</li>
+        <li><span style="color:red;">Third position</span>, CIRCUISTIC 1.0, CONVOLUTION 2014, Dept. of Elec Engg, Jadavpur University</li>
+    </ul>
     
 </main>
+
+<script>
+    const careerData = [
+            { date: "Jul 2016", company: "PricewaterhouseCoopers (PwC) India", role: "Consultant" },
+            { date: "May 2018", company: "National University of Singapore", role: "Research Engineer" },
+            { date: "Sep 2018", company: "Stony Brook University", role: "Research Assistant/Teaching Assistant/Mentor" },
+            { date: "Jun 2022", company: "Nokia Bell Labs", role: "Cloud and Networking Intern" },
+            { date: "May 2023", company: "YouTube", role: "Software Engineering Ph.D. Intern" },
+            { date: "Sep 2023", company: "Berkeley Lab", role: "Visiting Research Student Intern" },
+            { date: "Sep 2024", company: "Google Cloud", role: "Software Engineer III (L4)" }
+        ];
+
+    const container = document.getElementById('timelineContainer');
+    const progressLine = document.getElementById('progressLine');
+    
+    // Build the HTML structure dynamically
+    careerData.forEach((item) => {
+        const node = document.createElement('div');
+        node.className = 'timeline-node'; // Updated class names to avoid conflicts
+        node.innerHTML = `
+            <div class="timeline-node-content">
+                <h3>${item.company}</h3>
+                <h4>${item.role}</h4>
+                <span>${item.date}</span>
+            </div>
+            <div class="timeline-dot"></div>
+        `;
+        container.appendChild(node);
+    });
+
+    function playTimelineAnimation() {
+            const nodes = document.querySelectorAll('.timeline-node');
+            const totalWidth = nodes.length * 220; 
+            
+            // 1. Reset everything to the starting state
+            progressLine.style.width = '0px';
+            container.scrollTo({ left: 0, behavior: 'smooth' });
+            nodes.forEach(node => node.classList.remove('visible'));
+
+            // 2. Wait slightly for the reset to finish, then start the build
+            setTimeout(() => {
+                progressLine.style.width = `${totalWidth - 100}px`;
+
+                nodes.forEach((node, index) => {
+                    setTimeout(() => {
+                        node.classList.add('visible');
+                        
+                        // Auto-scroll
+                        if (index > 3) {
+                            container.scrollTo({
+                                left: (index - 3) * 220,
+                                behavior: 'smooth'
+                            });
+                        }
+
+                        // 3. If this is the last item, wait 3 seconds and restart the loop
+                        if (index === nodes.length - 1) {
+                            setTimeout(playTimelineAnimation, 3000); 
+                        }
+
+                    }, 300 + (index * 250)); 
+                });
+            }, 800);
+        }
+
+    window.onload = playTimelineAnimation;
+</script>
+
+</body>
+</html>
