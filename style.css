@@ -130,7 +130,9 @@ ul, ol {
 }
 @media (min-width: 768px) {
     .grid-container {
-        grid-template-columns: 1fr 1fr 1fr;
+        /* commenting out 3 columns */
+        /* grid-template-columns: 1fr 1fr 1fr;*/
+        grid-template-columns: 1fr 1fr;
     }
 }
 .grid-item {
@@ -379,4 +381,119 @@ ul, ol {
     border-radius: 8px;
     margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* The way to highlight the active page */
+/* Creates the background and locks it into 2 columns */
+.skills-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Forces exactly two columns */
+    gap: 25px;
+    align-items: start; /* PREVENTS the "5 rows" stretching issue! */
+    background-color: #f4f6f8; 
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: sans-serif;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Adds spacing between stacked cards in the right column */
+.skills-column {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Space between ML and Scientific Writing */
+}
+
+/* Styles the individual category cards */
+.skill-category {
+    background-color: #ffffff; 
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.skill-category h3 {
+    border-bottom: 2px solid #222;
+    padding-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #222;
+}
+
+.skill-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.skill-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #eee;
+}
+
+/* --- Fractional Star CSS (Remains Unchanged) --- */
+.star-rating { display: inline-block; }
+.stars-outer {
+    display: inline-block;
+    position: relative;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: #e0e0e0;
+}
+.stars-outer::before { content: "★★★★★"; }
+.stars-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #f39c12;
+}
+.stars-inner::before { content: "★★★★★"; }
+
+/* Optional: Make it stack nicely on mobile phones */
+@media (max-width: 768px) {
+    .skills-wrapper {
+        grid-template-columns: 1fr; /* Changes to 1 column on small screens */
+    }
+}
+
+/* Adding Resume Button */
+/* Ensure the container aligns everything in a neat row */
+.social-links-container {
+    display: flex;
+    align-items: center; /* Vertically centers the icons with the buttons */
+    gap: 15px; /* Adds space between each icon and button */
+    flex-wrap: wrap; /* Ensures they stack nicely on small mobile screens */
+}
+
+/* Style the new resume buttons */
+.resume-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #2c3e50; /* A professional dark blue/gray */
+    color: #ffffff; /* White text */
+    text-decoration: none;
+    border-radius: 6px; /* Slightly rounded corners */
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit; /* Matches your site's font */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Add a hover effect so they feel interactive */
+.resume-btn:hover {
+    background-color: #1a252f; /* Darkens slightly on hover */
+    color: #ffffff; 
+}
+
+/* Optional: Add a subtle click effect */
+.resume-btn:active {
+    transform: scale(0.97); 
 }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Work Experience - Arghya Bhattacharya</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/jpg" href="images/ab_convocation.jpg">
     
     <style>
         /* Scoped wrapper so it doesn't mess up your whole page's width/scrolling */
@@ -108,9 +109,8 @@
 
 <nav>
     <a href="index.html">Home</a>
-    <a href="experience.html">Work Experience</a>
+    <a href="experience.html" class="active">Work Experience</a>
     <a href="publications.html">Publications & Talks</a>
-    <a href="projects.html">Projects & Extras</a>
     <a href="blogs.html">Blogs & About</a>
 </nav>
 
@@ -146,12 +146,16 @@
                         <div class="timeline-badge">Sep 2024 &mdash; Present</div>
                     </div>
                     <ul style="list-style-type:square">
-                        <li><b>Bare Metal Cloud Infrastructure:</b> I engineer Google Cloud Platform (GCP) solutions to develop, maintain, and operationalize Bare Metal cloud solutions for demanding applications. The Google Computing Engine (GCE) Node Bare Metal servers allow users to run specialized high-performance computing (HPC) workloads, e.g., third-party virtualization software, applications with low-level access to the server, applications with ultra-low-latency (ULL) networking requirements, computationally demanding AI workloads, etc. Our team manages the regionally distributed cluster of servers with high-performance connection with a low-latency network fabric.</li>
+                        <li><b>Bare Metal Cloud Infrastructure:</b> I engineer Google Cloud Platform (GCP) solutions to develop, maintain, and operationalize Bare Metal cloud solutions for demanding applications. The Google Computing Engine (GCE) Node Bare Metal servers allow users to run specialized high-performance computing (HPC) workloads, e.g., third-party virtualization software, applications with low-level access to the server, applications with ultra-low-latency (ULL) networking requirements, computationally demanding AI workloads, etc. Our team manages the development and availability of regionally distributed cluster of servers with high-performance connection with a low-latency network fabric.</li>
                         <ul style="list-style-type:square">
-                            <li>I worked on the first arm-based bare metal shape Google Cloud developed in 2025-2026. Here is a <a href="https://cloud.google.com/blog/products/compute/new-axion-c4a-metal-offers-bare-metal-performance-on-arm?e=48754805">Google Cloud Blog</a> as the public announcement of the product C4A Metal.</li>
+                            <li> I was involved in testing through the CI/CD pipeline and overall DevOps for building several Bare Metal shapes. 
+                            <li>I worked on the <span class="highlight"> first arm-based bare metal</span> shape Google Cloud developed in 2025-2026. Here is a <a href="https://cloud.google.com/blog/products/compute/new-axion-c4a-metal-offers-bare-metal-performance-on-arm?e=48754805">Google Cloud Blog</a> as the public announcement of the product C4A Metal.</li>
+                            <li>I worked on the <span class="highlight"> first GPU-based bare metal </span> Google Cloud developed which went GA around the end of Q1 2026, <a href="https://docs.cloud.google.com/compute/docs/gpus#gb300-gpus"> A4X Max Metal</a>.</li>
                         </ul>
-                        <li><b>AI Tooling:</b> I made a small sub-team of 4 engineers and led the development of an agentic AI tool to resolve issues for a tier-2 oncall (with SLO of 30 minutes) for GCE Bare Metal team.</li>
+                        <li><b>AI Tooling:</b> I made a small sub-team of 4 engineers and led the design and development of an end-to-end integrated agentic AI tool to resolve issues for a tier-2 oncall (with SLO of 30 minutes) for GCE Bare Metal team. The tool utilizes a Retrieval Augmented Generation (RAG) agent, a vector database, and integrates with Google's internal Large Language Model (LLM) and provides a Frontend to the user. This tool increased the Bare Metal team's productivity to an extent that it motivated a number of other teams in the Org to leverage from the tool and integrate their knowledge corpus.</li>
+                        <li><b>Observability:</b> I develop, maintain, and own a number of internal dashboards to maintain health and monitor capacity of Bare Metal fleet. This improves the decision making for the team on a daily basis.</li>
                         <li><b>Hackathon:</b> I led a small sub-team of 4 engineers for a hackathon entry for AI2 hackathon with an early version of the oncall AI tool.</li>
+                        <li><b>Interviews:</b> I took ~50 interviews of Software Engineering Full-time, SWE Intern, and Research Intern L3 - L5 interview candidates.</li>
                         <li><b>Volunteer:</b> I took ~20 <b>Google Champion calls</b> (mock interviews).</li>
                     </ul>
                 </div>
@@ -189,28 +193,18 @@
                 <div class="role-entry">
                     <div class="role-header">
                         <div class="role-title-group">
-                            <h4>Research Project Assistant</h4>
+                            <h4>Machine Learning Intern, Strategic Partnership for Industrial Resurgence (SPIR)</h4>
                             <div class="role-meta">
                                 <span class="role-location">Stony Brook, NY, USA</span>
-                                <span class="advisor-text"><strong>Advisor:</strong> <a href="https://www3.cs.stonybrook.edu/~bender/"> Prof. Michael A. Bender</a></span>
+                                <span class="advisor-text"><strong>Hosts:</strong> <a href="https://people.njit.edu/profile/dtyu"> Prof. Dantong Yu</a> and <a href="https://sunriseaitech.com/team-page/"> Yu Sun</a></span>
                             </div>
                         </div>
-                        <div class="timeline-badge">Jun 2019 — Dec 2022</div>
+                        <div class="timeline-badge">Jan 2024 &mdash; Aug 2024</div>
                     </div>
                     <ul style="list-style-type:square">
-                        <li><b>Cache-efficient algorithms:</b> I designed an empirical framework to evaluate when programs are cache- and memory-adaptive for external memory applications. These programs maintain good performance despite memory fluctuations, which are typically found in multicore, multithreaded, shared-memory, and cloud systems. I provided an algorithm design principle and reference implementation for cache-adaptive algorithms to solve large external-memory problem instances for fundamental problems such as cubic-time matrix multiplication, sorting, and dynamic programming algorithm for the longest common subsequence (LCS). </li>
-                        <ul style="list-style-type:square">
-                            <li> Check out our paper in <a href="https://doi.org/10.4230/LIPIcs.ESA.2022.16"> 30th Annual European Symposium on Algorithms (ESA 2022)</a></li>
-                        </ul>
-                        <li><b>Machine-learning augmentation:</b> I redesigned traditional online algorithms rent-or-buy problems with augmentation by single and multiple ML oracles accounting for arbitrarily fluctuating discounts on the rent of the resource. In the subsequent work, I revisited conventional online decision-making problems, such as list access problem, job scheduling problem, secretary selection problems, and green and parallel paging problem.</li>
-                        <ul style="list-style-type:square">
-                            <li>Check out our paper at <a href="https://doi.org/10.1007/978-3-030-96731-4_18"> 16th International Conference and Workshops on Algorithms and Computation (WALCOM 2022)</a> and our article at <a href="https://doi.org/10.1016/j.tcs.2022.10.006"> Elsevier Theoretical Computer Science</a>.</li>
-                            <li>Check out our poster at <a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf"> SIGMETRICS 2023</a>.</li>
-                        </ul>
-                        <li><b>Filesystem aging:</b> I collaborated with a large group of researchers, engineers, and professors to evaluate the degradation of read performance across five production filesystems, <i>ext4, btrfs, xfs, zfs, and f2fs</i>, owing to poor data layout and disk fullness. This evaluation, conducted using microbenchmarks and application-level fragmentation benchmarks, demonstrated that the degradation could be mitigated with a $B^{\varepsilon}$-tree-based write-optimized in-kernel filesystem like <i>BetrFS</i>. 
-                        <ul style="list-style-type:square">
-                            <li>Check out our article on <a href="https://arxiv.org/abs/2401.08858"> ArXiv</a>.</li>
-                        </ul>
+                        <li> <b>Explainable Graph Learning:</b> I collaborated with researchers from Brookhaven and Los Alamos national labs and designed an explainable graph neural network (GNN) to detect <i>heavy flavor decays</i> in real-time for the sPHENIX project, a high-energy nuclear physics experiment at Brookhaven National Laboratory.
+                        </li>
+                        <li> <b>Terabits data transfer:</b> I worked with engineers at <a href="https://sunriseaitech.com/"> Sunrise Technology Inc.</a> incubated at the <a href="https://www.cewit.org/"> Center of Excellence Wireless and Information Technology (CEWIT)</a> on the development of a low-power embedded system (NVIDIA Jetson devices serving as DPUs) enabling high-speed data transfer (100 Gbps) across distributed file system nodes (CephFS) over the internet using RDMA protocol RoCEv2, optimizing performance for high-performance computing applications (funded by and in collaboration with the Department of Energy). Feel free to check out <a href="https://www.youtube.com/watch?v=Y2Dunuc6AuQ"> this demo</a>.
                         </li>
                     </ul>
                 </div>
@@ -218,13 +212,42 @@
                 <div class="role-entry">
                     <div class="role-header">
                         <div class="role-title-group">
-                            <h4>Mentor, High School Women in Science and Engineering (HS-WISE)</h4>
+                            <h4>Research Project Assistant</h4>
+                            <div class="role-meta">
+                                <span class="role-location">Stony Brook, NY, USA</span>
+                                <span class="advisor-text"><strong>Advisor:</strong> <a href="https://www3.cs.stonybrook.edu/~bender/"> Prof. Michael A. Bender</a></span>
+                            </div>
+                        </div>
+                        <div class="timeline-badge">Jun 2019 &mdash; Dec 2022</div>
+                    </div>
+                    <ul style="list-style-type:square">
+                        <li><b>Cache-efficient algorithms:</b> I designed an empirical framework to evaluate when programs are cache- and memory-adaptive for external memory applications. These programs maintain good performance despite memory fluctuations, which are typically found in multicore, multithreaded, shared-memory, and cloud systems. I provided an algorithm design principle and reference implementation for cache-adaptive algorithms to solve large external-memory problem instances for fundamental problems such as cubic-time matrix multiplication, sorting, and dynamic programming algorithm for the longest common subsequence (LCS). </li>
+                        <ul style="list-style-type:square">
+                            <li> Check out our paper in <a href="https://doi.org/10.4230/LIPIcs.ESA.2022.16"> 30th Annual European Symposium on Algorithms (ESA 2022)</a></li>
+                            <li>I extended this work and built a framework to evaluate the performance of external-memory algorithms with multi-threading in a multi-program HPC environment and broadly offers a recipe for algorithm design for <b>multi-threading ecosystem</b>. Check out the <a href="https://github.com/ArghyaB118/threading_ecosystems"> code</a>.</li>
+                        </ul>
+                        <li><b>Machine-learning augmentation:</b> I redesigned traditional online algorithms rent-or-buy problems with augmentation by single and multiple ML oracles accounting for arbitrarily fluctuating discounts on the rent of the resource. In the subsequent work, I revisited conventional online decision-making problems, such as list access problem, job scheduling problem, secretary selection problems, and green and parallel paging problem.</li>
+                        <ul style="list-style-type:square">
+                            <li>Check out our paper at <a href="https://doi.org/10.1007/978-3-030-96731-4_18"> 16th International Conference and Workshops on Algorithms and Computation (WALCOM 2022)</a> and our article at <a href="https://doi.org/10.1016/j.tcs.2022.10.006"> Elsevier Theoretical Computer Science</a>.</li>
+                            <li>Check out our poster at <a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf"> SIGMETRICS 2023</a>.</li>
+                        </ul>
+                        <li><b>Filesystem aging:</b> I collaborated with a large group of researchers, engineers, and professors to evaluate the degradation of read performance across five production filesystems, <i>ext4, btrfs, xfs, zfs, and f2fs</i>, owing to poor data layout and disk fullness. This evaluation, conducted using microbenchmarks and application-level fragmentation benchmarks, demonstrated that the degradation could be mitigated with a $B^{\varepsilon}$-tree-based write-optimized in-kernel filesystem like <i>BetrFS</i>.</li>
+                        <ul style="list-style-type:square">
+                            <li>Check out our article on <a href="https://arxiv.org/abs/2401.08858"> ArXiv</a>.</li>
+                        </ul>
+                    </ul>
+                </div>
+
+                <div class="role-entry">
+                    <div class="role-header">
+                        <div class="role-title-group">
+                            <h4>Mentor, Women in Science and Engineering (HS-WISE)</h4>
                             <div class="role-meta">
                                 <span class="role-location">Stony Brook, NY, USA</span>
                                 <span class="advisor-text"><strong>Supervisor:</strong> <a href="https://www.linkedin.com/in/jacquelyn-gatta-8020909a/"> Jacquelyn Gatta</a></span>
                             </div>
                         </div>
-                        <div class="timeline-badge">Sep 2019 - Apr 2023</div>
+                        <div class="timeline-badge">Sep 2019 &mdash; Apr 2023</div>
                     </div>
                     <ul style="list-style-type:square">
                         <li>Lessons: Basics of Probability and Thinking Algorithmically.</li>
@@ -245,7 +268,7 @@
                             <h4>Graduate Teaching Assistant</h4>
                             <span class="role-location">Stony Brook, NY, USA</span>
                         </div>
-                        <div class="timeline-badge">Sep 2018 — Apr 2023</div>
+                        <div class="timeline-badge">Sep 2018 &mdash; May 2919 & Jan 2023 &mdash; Apr 2023</div>
                     </div>
                     <ul style="list-style-type:square">
                         <li>Graded papers and homework assignments, proctored exams, and took weekly office hours.</li>
@@ -273,7 +296,7 @@
                     <div class="timeline-badge">Sep 2023 &mdash; Dec 2023</div>
                 </div>
                 <ul style="list-style-type:square">
-                    <li><b>Dynamic GAP:</b> I designed an experimental framework to study the performance of external-memory algorithms (APIs) for large sparse dynamic graphs.</li>
+                    <li><b>Dynamic GAP:</b> I Expanded the experimental framework of the GAP@Berkeley project to incorporate dynamic graph algorithms and designed an experimental framework to study the performance of external-memory algorithms (APIs) for large sparse dynamic graphs. I studied batch-parallel algorithms for processing large sparse time-evolving graphs and conducted a comparative study with the top node-wise parallel static algorithm using this framework. Check out the <a href="https://github.com/thisisarghya/DynamicGAP"> GitHub repo</a> for this work.</li>
                 </ul>
             </div>
         </div>

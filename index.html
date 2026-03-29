@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <title>Arghya Bhattacharya</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/jpg" href="images/ab_convocation.jpg">
 </head>
 <body>
 
     <nav>
-        <a href="index.html">Home</a>
+        <a href="index.html" class="active">Home</a>
         <a href="experience.html">Work Experience</a>
         <a href="publications.html">Publications & Talks</a>
-        <a href="projects.html">Projects & Extras</a>
         <a href="blogs.html">Blogs & About</a>
     </nav>
 
@@ -24,46 +24,102 @@
             <a href="https://www.linkedin.com/in/reach-arghya-bhattacharya/"><img src="images/linkedin.png" alt="LinkedIn" width="30" height="30"></a>
             <a href="https://github.com/ArghyaB118"><img src="images/github.png" alt="GitHub" width="30" height="30"></a>
             <a href="https://scholar.google.com/citations?hl=en&authuser=1&user=tvw7c5wAAAAJ"><img src="images/scholar.png" alt="Google Scholar" width="30" height="30"></a>
-            <a href="docs/Arghya_Bhattacharya_Resume.pdf" target="_blank"><img src="images/resume.png" alt="Resume" width="30" height="30"></a>
+            <a href="docs/Arghya_Bhattacharya_Resume_OnePager.pdf" target="_blank" class="resume-btn">Resume (1 Pager)</a>
+            <a href="docs/Arghya_Bhattacharya_Resume.pdf" target="_blank" class="resume-btn">Resume (2 Pager)</a>
 	</div>
     </header>
 
     <main>
-        <div class="grid-container">
-            <div class="grid-item">
-                <h3>Short Bio</h3>
-                <ul>
-                    <li>Ph.D., <a href="https://www.cs.stonybrook.edu">Stony Brook CS</a></li>
-                    <li>B.Eng., <a href="https://jadavpuruniversity.in/academics/electrical-engineering/">Jadavpur University EE</a></li>
-                    <li>Software Engineer III (L4), <a href="https://about.google">Google</a></li>
-                    <li>(Former) Intern at <a href="https://www.lbl.gov/">Berkeley Lab</a></li>
-                    <li>(Former) Intern at <a href="https://about.google">Google</a></li>
-                    <li>(Former) Intern at <a href="https://www.bell-labs.com">Nokia Bell Labs</a></li>
-                </ul>
-            </div>
-            <div class="grid-item">
-                <h3>Research Interest</h3>
-                <ul>
-                    <li>External memory algorithm</li>
-                    <li>Parallel algorithm</li>
-                    <li>Machine learning (ML) advice</li>
-                    <li>Computer networks</li>
-                    <li>Dynamic graph algorithm</li>
-                    <li>Filesystem aging</li>
-                </ul>
-            </div>
-            <div class="grid-item">
-                <h3>Technical Skills</h3>
-                <ul>
-                    <li><b>Programming Language:</b> C/C++, Bash, Python</li>
-                    <li><b>Database:</b> MySQL</li>
-                    <li><b>Machine Learning:</b> Keras, PyTorch</li>
-                    <li><b>Numeric Computing:</b> Matlab</li>
-                    <li><b>Scientific Writing:</b> Latex</li>
-                </ul>
-            </div>
+    <div class="grid-container">
+        <div class="grid-item">
+            <h3>Short Bio</h3>
+            <ul>
+                <li>Ph.D., <a href="https://www.cs.stonybrook.edu">Stony Brook CS</a></li>
+                <li>B.Eng., <a href="https://jadavpuruniversity.in/academics/electrical-engineering/">Jadavpur University EE</a></li>
+                <li>Software Engineer III (L4), <a href="https://about.google">Google</a></li>
+                <li>(Former) Intern at <a href="https://www.lbl.gov/">Berkeley Lab</a></li>
+                <li>(Former) Intern at <a href="https://about.google">Google</a></li>
+                <li>(Former) Intern at <a href="https://www.bell-labs.com">Nokia Bell Labs</a></li>
+            </ul>
+        </div>
+        <div class="grid-item">
+            <h3>Research Interest</h3>
+            <ul>
+                <li>External memory algorithm</li>
+                <li>Parallel algorithm</li>
+                <li>Machine learning (ML) advice</li>
+                <li>Computer networks</li>
+                <li>Dynamic graph algorithm</li>
+                <li>Filesystem aging</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>Technical Skills</h3>
+    <div class="skills-wrapper">
+    <div class="skills-column">
+        <div class="skill-category">
+            <h3>Programming & Databases</h3>
+            <ul class="skill-list">
+                <li>
+                    <span class="skill-name">C/C++</span>
+                    <div class="star-rating" data-rating="4.6"></div>
+                </li>
+                <li>
+                    <span class="skill-name">Python</span>
+                    <div class="star-rating" data-rating="4.2"></div>
+                </li>
+                <li>
+                    <span class="skill-name">Bash</span>
+                    <div class="star-rating" data-rating="4.0"></div>
+                </li>
+                <li>
+                    <span class="skill-name">GoogleSQL</span>
+                    <div class="star-rating" data-rating="4.5"></div>
+                </li>
+                <li>
+                    <span class="skill-name">Matlab</span>
+                    <div class="star-rating" data-rating="3.5"></div>
+                </li>
+                <li>
+                    <span class="skill-name">HTML/CSS/JS</span>
+                    <div class="star-rating" data-rating="3.5"></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="skills-column">
+        <div class="skill-category">
+            <h3>Machine Learning</h3>
+            <ul class="skill-list">
+                <li>
+                    <span class="skill-name">PyTorch</span>
+                    <div class="star-rating" data-rating="4.0"></div>
+                </li>
+                <li>
+                    <span class="skill-name">Keras</span>
+                    <div class="star-rating" data-rating="3.5"></div>
+                </li>
+            </ul>
         </div>
 
+        <div class="skill-category">
+            <h3>Scientific Writing</h3>
+            <ul class="skill-list">
+                <li>
+                    <span class="skill-name">LaTeX</span>
+                    <div class="star-rating" data-rating="4.5"></div>
+                </li>
+                <li>
+                    <span class="skill-name">Markdown</span>
+                    <div class="star-rating" data-rating="5.0"></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    </div>
    
         <h2>Summary</h2>
         <ul style="list-style-type:square; line-height: 1.8;">
@@ -73,7 +129,7 @@
             
             <li><b> Research Interest:</b> Broadly, I am interested in <b>algorithm engineering and distributed networked systems design</b>. I primarily focus on algorithms, data structures, probability, and machine learning (ML). More specifically, I study the performance of cache-efficient external-memory algorithms, parallel (multi-threaded) algorithms, ML-advised online algorithms and data structures, dynamic graph algorithms, and filesystem aging.</li>
             
-            <li><b>Technical Skills:</b> My programming skills include C/C++, Bash, Python, Matlab, MySQL, Keras, and PyTorch.</li>
+            <li><b>Technical Skills:</b> My programming skills include C/C++ (including Multithreading tools: std::thread, posix thread, OpenMP), Bash (Memory management: control group; Virtualization: QEMU, KVM; Network: iperf, netcat, FTP, Ethernet/InfiniBand networks, TCP/IP stack, RDMA, RoCE, OFED, and peer-to-peer data transfer systems), Python (Libraries: NumPy, Pandas, Scipy; ML: Keras, PyTorch, Scikit-learn, XGBoost, Docker Cvxpy; Data visualization: Matplotlib, Seaborn, Plotly; Web development: Streamlit, Flask), GitHub (Version control), GoogleSQL, Matlab, Latex, Markdown, HTML, CSS, JavaScript.</li>
         </ul>
 
 	   <h2>Education</h2>
@@ -98,6 +154,13 @@
                         <li>I was fortunate that <a href="https://www3.cs.stonybrook.edu/~bender/"> Prof. Michael A. Bender</a> (John L. Hennessy Chaired Professor of Computer Science) advised my doctoral thesis.</li>
                         <li>I am also elated that <a href="https://www3.cs.stonybrook.edu/~rezaul/"> Prof. Rezaul A. Chowdhury</a> (Associate Professor of Computer Science)) served as the chair of my thesis committee. I am also honored to have <a href="https://www.ams.sunysb.edu/~jsbm/jsbm.html"> Prof. Joseph S. B. Mitchell</a> (SUNY Distinguished Professor and Chair of Applied Mathematics and Statistics) on my committee. Finally, <a href="https://itshelenxu.github.io/"> Prof. Helen Xu</a> (Assistant Professor at Georgia Tech CS) was the external member.</li>
                         <li>Graduate Coursework: Analysis of Algorithms, Data Science Fundamentals, Discrete Mathematics, Fundamentals of Computer Networks, Introduction to Computer Vision, Medical Imaging, Theory of Database Systems.</li>
+                        <li><b>Academic Services:</b> I subreviewed papers and articles for ESA’23, SPAA’22, SPAA’23, SPAA’24, IPDPS’23, SEA’23, APOCS’23 and Reviewer for Soft Computing, Springer and Neural Computing and Applications, Springer.</li>
+                        <li><b>Notable Class projects:</b>
+                        <ul style="list-style-type:square">
+                            <li><a href="https://github.com/thisisarghya/network_curvature/blob/master/Text/project_534.pdf"> Optimizing network congestion window using Ricci Curvature</a>
+                            <li><a href="https://github.com/ArghyaB118/Image_Segmentation/blob/main/Project_CSE527/Final_Report.pdf"> Semantic segmentation using U-Net and instance segmentation of nuclei using Mask R-CNN.</a>
+                            <li>Identifying fundraising donors with Logistic Regression, Decision Tree, Random Forest, and LightGBM.</li>
+                        </ul></li>
                     </ul>
                 </div>
             </div>
@@ -115,10 +178,11 @@
                         </div>
                         <div class="timeline-badge">Jul 2012 &mdash; May 2016</div>
                     </div>
-                    
-                    <p><strong>Advisor:</strong> Prof. Debangshu Dey</p>
+
                     <ul style="list-style-type:square">
-                        <li>Related Coursework: Advanced Instrumentation, Reliability Engineering, Circuit Theory, Computer Fundamentals, Control System Engineering, Digital Signal Processing, Signals and Systems, Engineering Economics, Engineering Mathematics, Microprocessor and Microcontroller, Numerical Analysis, Principles of Communications, Process Instrumentation.</li>
+                        <li><strong>Advisor:</strong> Prof. Debangshu Dey</li>
+                        <li>Related Coursework: Advanced Instrumentation <b>(Special Paper)</b>, Reliability Engineering, Circuit Theory, Computer Fundamentals, Control System Engineering, Digital Signal Processing, Signals and Systems, Engineering Economics, Engineering Mathematics, Microprocessor and Microcontroller, Numerical Analysis, Principles of Communications, Process Instrumentation.</li>
+                        <li>I was awarded the <a href="https://jbnsts.ac.in"> Jagadis Bose National Science Talent Search (JBNSTS)</a> Senior Scholarship 2012.</li>
                     </ul>
                 </div>
             </div>
@@ -126,6 +190,30 @@
         </div>	
 	
     <iframe src="terminal.html" width="100%" height="700px" style="border: none; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"></iframe>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const starContainers = document.querySelectorAll('.star-rating');
+
+            starContainers.forEach(container => {
+                // Read the fractional number (using parseFloat instead of parseInt)
+                const rating = parseFloat(container.getAttribute('data-rating'));
+                
+                // Calculate the rating as a percentage (e.g., 4.5 / 5 = 0.9 * 100 = 90%)
+                const starPercentage = (rating / 5) * 100;
+
+                // Optional: Round to the nearest 10% to account for slight character spacing issues
+                const starPercentageRounded = `${Math.round(starPercentage / 10) * 10}%`;
+
+                // Inject the outer and inner star divs, applying the calculated width
+                container.innerHTML = `
+                    <div class="stars-outer">
+                        <div class="stars-inner" style="width: ${starPercentage}%;"></div>
+                    </div>
+                `;
+            });
+        });
+    </script>
 
     </main>
 
