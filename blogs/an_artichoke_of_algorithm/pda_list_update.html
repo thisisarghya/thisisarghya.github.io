@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Analysis: Online List Update with Predictions</title>
+
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* Scoped Navigation Menu Styling */
+        .main-nav {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            width: 100%;
+            max-width: 800px; /* Matches your article-content max-width */
+            box-sizing: border-box;
+        }
+
+        .main-nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #0056b3;
+            display: inline-block; /* Helps with spacing on mobile */
+            padding: 5px 0;
+        }
+
+        .main-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .blog-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+
+        /* Styling for the converted Markdown article */
+        .article-content {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 3rem;
+            max-width: 800px;
+            width: 100%;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+
+        .article-content h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-top: 0;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .article-content h2 { color: #2980b9; margin-top: 1.5rem; }
+        .article-content h3 { color: #34495e; margin-top: 1.2rem; }
+        .article-content h4 { color: #2c3e50; }
+        
+        .article-content ul { padding-left: 20px; }
+        .article-content li { margin-bottom: 8px; }
+        
+        .article-content blockquote {
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            color: #555;
+            font-style: italic;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .article-content hr {
+            border: 0;
+            height: 1px;
+            background: #ddd;
+            margin: 2rem 0;
+        }
+
+        .article-content a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .article-content a:hover { text-decoration: underline; }
+
+        /* Simulator Styling below */
+        h1.sim-title { color: #2c3e50; margin-top: 0; }
+
+        .sequence-container {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .sequence {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .seq-item {
+            background: #ecf0f1;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .seq-item.active {
+            background: #3498db;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .seq-item.past {
+            background: #2c3e50;
+            color: white;
+            opacity: 0.5;
+        }
+
+        .controls { margin-bottom: 2rem; }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            background-color: #2ecc71;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin: 0 5px;
+        }
+
+        button:hover { background-color: #27ae60; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        button.reset { background-color: #e74c3c; }
+        button.reset:hover { background-color: #c0392b; }
+
+        .panels {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 220px;
+            text-align: center;
+        }
+
+        .cost {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 15px;
+        }
+
+        .list-state {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .list-item {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .list-item.highlight {
+            background: #f1c40f;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="main-nav">
+    <a href="../../index.html">Home</a>
+    <a href="../../experience.html">Work Experience</a>
+    <a href="../../publications.html">Publications & Talks</a>
+    <a href="../../blogs.html" class="active">Blogs & About</a>
+</nav>
+    <div class="article-content">
+    <h1>Technical Analysis: Online List Update with Predictions</h1>
+
+    <ul>
+        <li><strong>Author:</strong> Arghya Bhattacharya, Google Cloud, USA</li>
+        <li><strong>Date:</strong> September 15, 2024</li>
+    </ul>
+
+    <p><em>Note: The following content is built on, expanded, and made more detailed from a poster presentation in Learning-augmented Algorithms: Theory and Applications (LATA) at ACM SIGMETRICS 2023 (<a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf" target="_blank">link</a>). I co-authored the article with <a href="https://itshelenxu.github.io/"> Dr. Helen Xu</a>, who was a PostDoc back then at Lawrence Berkeley National Laboratory (Berkeley Lab), and now is an Assistant Prof. at Georgia Tech and <a href="https://sites.google.com/corp/view/shahinkamali/home"> Dr. Shahin Kamali</a>, who is an Associate Prof. (he was an Assistant Prof.) at York University.</em></p>
+        
+    <h2>0. Context</h2>
+    <p>Before diving into the mechanics of the PDA algorithm, it is important to establish the traditional framework of online algorithms and contrast it with the more recently developed ML-advised paradigm.</p>
+    
+    <p>Traditionally, an <strong>online algorithm</strong> is defined by its lack of futuristic knowledge. It must serve an input sequence of requests sequentially—making irrevocable decisions and modifying the system state for each request before moving on to the next. Because it operates entirely without foresight, its performance is typically measured using a framework called <strong>competitive analysis</strong>, where the online algorithm's cost is compared against an optimal offline algorithm (OPT) that has full access to the entire future request sequence.</p>
+
+    <p>Recently, a new direction has emerged in the study of online algorithms: the <strong>Machine Learning (ML) advice model</strong>. These algorithms are referred to as learning-augmented or ML-advised algorithms or algorithms with predictions. In this modern framework, the strict assumption of zero futuristic knowledge is relaxed. Instead, the online algorithm is augmented with an "advisor" or "oracle"—often a trained machine learning model—that provides predictions about future requests. The algorithm can then incorporate this potentially faulty advice into its online decision-making process, aiming to achieve performance that surpasses traditional deterministic lower bounds when predictions are accurate, while maintaining robustness when the advice fails.</p>
+
+        <h2>1. Introduction to the List Update Problem</h2>
+        <p>In the list update problem, the input is an online sequence of access requests to items in a static linked list. To serve a request to an item at position \(i\), an online algorithm makes a linear scan of the list until it finds the item; this linear scan has an access cost of \(i\). After accessing the item, the algorithm may or may not reorganize the list to minimize the total cost of future accesses. For this, an algorithm has two choices for a reorganization of the list, i.e., two types of operations at its disposal:
+        <ul>
+            <li><strong>Free Exchange:</strong> Moves the currently accessed item anywhere closer to the front of the list with a cost of 0.</li>
+            <li><strong>Paid Exchange:</strong> Swaps the positions of any two consecutive items in the list with a unit cost of 1. The algorithms can make any number of paid exchanges</li>
+        </ul>
+        Given an input request sequence, a list update algorithm's objective is to maintain the list in a way that minimizes the total cost (i.e., the sum of costs for all accesses and paid exchanges).</p>
+
+        <p>While early literature assumed an optimal offline algorithm (OPT) would never perform paid exchanges, Reingold and Westbrook disproved this. For example, if the initial list is (1,2,3) and the request sequence is <3,2,2,3>, any algorithm using only free exchanges pays a cost of at least 9. However, by paying a cost of 2 upfront to execute two paid exchanges and alter the list to (2,3,1), the total cost reduces to 8.</p>
+
+        <h3>State-of-the-Art Algorithms</h3>
+        <p>Without futuristic knowledge, algorithms must rely on online heuristics. <strong>Move-To-Front (MTF)</strong>, which moves an accessed item to the front of the list using a free exchange, is 2-competitive and is the best a deterministic algorithm can achieve. Other deterministic approaches like <em>Frequency Count (FC)</em> and <em>Transpose</em> fail to achieve a constant competitive ratio. Randomized algorithms (such as <em>Bit</em>, <em>Comb</em>, and <em>Random-Reset</em>) assign probabilities to confuse adaptive adversaries, achieving competitive ratios hovering between 1.6 and 1.75.</p>
+
+        <h2>2. The Penalty Distance Algorithm (PDA)</h2>
+        <p>We consider the classic list update problem under a prediction setting, where, upon accessing any item \(x\), a possibly faulty oracle predicts the next two times (indices in the input sequence) where \(x\) is requested again. We design a prediction model where the list update algorithm has access to predictions concerning the next two occurrences of the requested item in the request sequence. We refer to this algorithm as Penalty Distance Algorithm (PDA).</p>
+
+        <h3>2.1 Algorithmic Mechanics</h3>
+        <p>As each request is served, the list goes from one state to another through some paid exchanges and free exchanges. For that, PDA considers every possible configuration (ordering) of the list and computes two types of costs for each configuration, which we refer to as distance and penalty costs. PDA chooses the configuration that minimizes the sum of the penalty and the distance.</p>
+
+        <ul>
+            <li><strong>Penalty Cost:</strong> The idea behind penalty cost is to maintain an ideal configuration of the list that is aligned with an optimal ordering for lists of length 2 formed by the requested item and other items. Any violation of the ideal ordering in the above scheme translates to one unit of "penalty" in the PDA algorithm. For each possible configuration \(C\) of the list, it computes the number of items whose ordering with \(x\) in \(C\) is not ideal.</li>
+            <li><strong>Distance Cost:</strong> PDA also computes the distance of \(C\) from the current configuration, defined as the minimum number of free and paid exchanges to convert the current configuration of the list to \(C\).</li>
+        </ul>
+
+        <h4>Ideal Ordering Logic (2-Item Cases)</h4>
+        <p>Suppose \(b\) is the requested item, and let \(a\) be any item. If the current ordering is \((a, b)\), and the next three requests are predicted to be \((b, b, a,...)\), then \(a\) should be located after \(b\) in an ideal list. On the other hand, if the next three requests are predicted to be \(\langle a,a,b,\cdot\cdot\cdot\rangle\), then \(a\) should be located before \(b\) in an ideal list.</p>
+
+        <p>For lists of two items, correct predictions about the next request ensure optimality via a simple algorithm that only uses free exchanges: for a list formed by items \(a\) and \(b\), whenever there is a request to an item, say \(b\), in the second position, move it to the front if and only if the next request to \(b\) appears earlier than the next request to \(a\).</p>
+
+        <p>However, simple predictions about the next request reach their limit for lists of length 3. To make such decisions [regarding optimal free and paid exchanges], however, the algorithm requires the next two requests for each item.</p>
+
+        <h3>2.2 Conjecture 1 (Competitive Ratio)</h3>
+        <p>We are working on proof to show the following upper bound for the competitive ratio of PDA. If correct, the algorithm improves the best existing approximation algorithm with an approximation factor of 1.6 [6].</p>
+
+        <blockquote><strong>Conjecture 1.</strong> When the prediction is correct, using the proper potential function for the analysis, we show PDA's competitive ratio is \(\le1.6\).</blockquote>
+
+        <h2>3. Comparison: List Update vs. Caching (LRU)</h2>
+        <p>The paper investigates the list update problem in light of the recent development for the caching problem under a prediction model. Both List Update and Caching are foundational problems in the analysis of online algorithms.</p>
+
+        <ul>
+            <li><strong>Similarity in Intuition:</strong> The Least Recently Used (LRU) algorithm for caching has a competitive ratio of \(k\) for a cache of size \(k\) [12]. Essentially, LRU and MTF both prefer to keep the recently used items handy.</li>
+            <li><strong>The Critical Difference:</strong> The list update problem is NP-hard [2]. This is in contrast to the paging (caching) problem, where correct predictions about the next request ensure optimality via Belady’s rule (the simple algorithm that evicts the page that is requested furthest).</li>
+            <li><strong>Limits of Prediction:</strong> While perfect lookahead guarantees optimality in caching, it does not do so for List Update when the list length \(N > 2\). Even if predictions are correct, we cannot hope for optimal solutions. As noted in Section 2.1, simple predictions about the next request are insufficient for list lengths of 3, potentially requiring paid exchanges to achieve optimality, which necessitates predictions about the next two requests for each item.</li>
+        </ul>
+
+        <p>PDA seeks a consistent algorithm (good competitive ratio with correct predictions) that can be combined with Move-To-Front (MTF) to offer a Pareto-efficient solution that is robust when predictions are faulty.</p>
+
+        <hr>
+
+        <h3>Image Generation: PDA vs. MTF Decision Matrix</h3>
+        <p>The following simulator illustrates how the PDA algorithm uses lookahead predictions to make a different decision than the reactionary Move-To-Front algorithm, specifically for a list of two elements \(\{A, B\}\).</p>
+    </div>
+
+    <h1 class="sim-title">Interactive Simulator: Static vs MTF vs PDA</h1>
+    
+    <div class="sequence-container">
+        <h3>Request Sequence</h3>
+        <div class="sequence" id="sequence-ui"></div>
+    </div>
+
+    <div class="controls">
+        <button id="next-btn" onclick="nextStep()">Process Next Request</button>
+        <button class="reset" onclick="resetSim()">Reset</button>
+    </div>
+
+    <div class="panels">
+        <div class="panel">
+            <h2>Static</h2>
+            <div class="cost">Total Cost: <span id="cost-static">0</span></div>
+            <div class="list-state" id="list-static"></div>
+        </div>
+
+        <div class="panel">
+            <h2>MTF</h2>
+            <div class="cost">Total Cost: <span id="cost-mtf">0</span></div>
+            <div class="list-state" id="list-mtf"></div>
+        </div>
+
+        <div class="panel">
+            <h2>PDA</h2>
+            <div class="cost">Total Cost: <span id="cost-pda">0</span></div>
+            <div class="list-state" id="list-pda"></div>
+        </div>
+    </div>
+
+    <script>
+        const sequence = ['B', 'A', 'B', 'B', 'B', 'A', 'B', 'B', 'B'];
+        const initialList = ['A', 'B'];
+
+        let step = 0;
+        let state = {
+            static: { list: [...initialList], cost: 0 },
+            mtf: { list: [...initialList], cost: 0 },
+            pda: { list: [...initialList], cost: 0 }
+        };
+
+        function renderSequence() {
+            const container = document.getElementById('sequence-ui');
+            container.innerHTML = '';
+            sequence.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = `seq-item ${index === step ? 'active' : index < step ? 'past' : ''}`;
+                el.innerText = item;
+                container.appendChild(el);
+            });
+            document.getElementById('next-btn').disabled = step >= sequence.length;
+        }
+
+        function renderList(type, highlightItem = null) {
+            const container = document.getElementById(`list-${type}`);
+            document.getElementById(`cost-${type}`).innerText = state[type].cost;
+            container.innerHTML = '';
+            
+            state[type].list.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = `list-item ${item === highlightItem ? 'highlight' : ''}`;
+                el.innerHTML = `<span>Pos ${index + 1}</span> <span>${item}</span>`;
+                container.appendChild(el);
+            });
+        }
+
+        function updateAllLists(highlightItem = null) {
+            renderList('static', highlightItem);
+            renderList('mtf', highlightItem);
+            renderList('pda', highlightItem);
+            
+            if (highlightItem) {
+                setTimeout(() => updateAllLists(null), 500);
+            }
+        }
+
+        function nextStep() {
+            if (step >= sequence.length) return;
+            const req = sequence[step];
+
+            // 1. Static Update
+            const staticIdx = state.static.list.indexOf(req);
+            state.static.cost += (staticIdx + 1);
+
+            // 2. MTF Update
+            const mtfIdx = state.mtf.list.indexOf(req);
+            state.mtf.cost += (mtfIdx + 1);
+            state.mtf.list.splice(mtfIdx, 1);
+            state.mtf.list.unshift(req);
+
+            // 3. PDA Update
+            const pdaIdx = state.pda.list.indexOf(req);
+            state.pda.cost += (pdaIdx + 1);
+            
+            // PDA Lookahead Logic (Only moves if requested item is in position 2)
+            if (pdaIdx === 1) {
+                const otherItem = state.pda.list[0];
+                const remainingSequence = sequence.slice(step + 1);
+                
+                const nextReqIdx = remainingSequence.indexOf(req);
+                const nextOtherIdx = remainingSequence.indexOf(otherItem);
+                
+                const valReq = nextReqIdx === -1 ? Infinity : nextReqIdx;
+                const valOther = nextOtherIdx === -1 ? Infinity : nextOtherIdx;
+
+                // Move to front if the requested item appears BEFORE the other item in the future
+                if (valReq < valOther) {
+                    state.pda.list.splice(1, 1);
+                    state.pda.list.unshift(req);
+                }
+            }
+
+            step++;
+            renderSequence();
+            updateAllLists(req);
+        }
+
+        function resetSim() {
+            step = 0;
+            state = {
+                static: { list: [...initialList], cost: 0 },
+                mtf: { list: [...initialList], cost: 0 },
+                pda: { list: [...initialList], cost: 0 }
+            };
+            renderSequence();
+            updateAllLists();
+        }
+
+        // Initialize UI
+        renderSequence();
+        updateAllLists();
+    </script>
+</body>
+</html>
