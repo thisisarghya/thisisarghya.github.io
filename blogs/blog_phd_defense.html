@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hosting a Ph.D. Intern at Google Cloud, Summer 2026 - Arghya Bhattacharya</title>
-    <meta name="description" content="Reflections on hosting a Ph.D. intern on the Google Cloud Bare Metal team in summer 2026, and what we built to make fleet maintenance observable.">
+    <title>Defending My Ph.D. Thesis - Arghya Bhattacharya</title>
+    <meta name="description" content="Reflections on defending my Ph.D. thesis, Going Beyond Worst-Case: A Study on Cache Adaptivity and Machine Learning Advice, at Stony Brook University.">
     <!-- This page lives in blogs/, so every top-level asset needs ../ -->
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/jpg" href="../images/ab_convocation.jpg">
@@ -19,7 +19,7 @@
             color: #fff;
             background:
                 linear-gradient(135deg, rgba(23, 43, 77, 0.92), rgba(66, 133, 244, 0.85)),
-                url("images/blog-phd-intern-2026.jpg") center 40% / cover no-repeat;
+                url("images/phd_defense_with_michael_2024.jpg") center 30% / cover no-repeat;
             box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
         .post-breadcrumb {
@@ -121,7 +121,21 @@
             border-top: 1px solid #e0e0e0;
         }
 
+        .blog-hero-pair {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .blog-hero-pair img {
+            width: 50%;
+            max-width: 380px;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+        }
+
         @media (max-width: 600px) {
+            .blog-hero-pair { flex-direction: column; align-items: center; }
+            .blog-hero-pair img { width: 100%; }
             .post-header { padding: 20px; }
             .post-header h1 { font-size: 24px; }
         }
@@ -140,32 +154,31 @@
     <article class="blog-post">
         <header class="post-header">
             <a href="../blogs.html" class="back-button">&larr; Back to Blogs</a>
-            <div class="post-breadcrumb"><a href="../blogs.html">Blogs</a> &rsaquo; Mentorship</div>
-            <span class="post-tag">Mentorship &middot; Google Cloud</span>
-            <h1>Hosting a Ph.D. Intern at Google Cloud: Summer 2026</h1>
-            <div class="post-meta">Arghya Bhattacharya &middot; September 2026 &middot; Seattle, WA &middot; 3 min read</div>
+            <div class="post-breadcrumb"><a href="../blogs.html">Blogs</a> &rsaquo; Research</div>
+            <span class="post-tag">Research &middot; Ph.D.</span>
+            <h1>Going Beyond Worst-Case: Defending My Ph.D. Thesis</h1>
+            <div class="post-meta">Arghya Bhattacharya &middot; November 2026 &middot; Stony Brook, NY &middot; 2 min read</div>
         </header>
 
-        <p>This summer, I hosted <a href="https://www.linkedin.com/in/stheera/">Mark Theeranantachai</a>, a final-year Ph.D. candidate at UCLA, as a Ph.D. intern on the Google Cloud Bare Metal team in Seattle. My teammate on the GCE Bare Metal team, <a href=https://www.linkedin.com/in/jinghaozhao/> Dr. Jinghao Zhao</a>, co-hosted the internship with me. Our project started with a simple question: when we maintain a large fleet of bare metal servers, where does the time actually go? Every minute a host spends in maintenance is a minute a customer can't use it, so answering that question well matters.</p>
+        <p>In 2024, I defended my doctoral thesis, <a href="https://www.proquest.com/openview/93cc0e2688f6662bb4d39634331a781d/1?pq-origsite=gscholar&cbl=18750&diss=y" target="_blank"><i>Going Beyond Worst-Case: A Study on Cache Adaptivity and Machine Learning Advice</i></a>, and graduated with a Ph.D. in Computer Science from Stony Brook University. The thesis asks one question: what happens when we stop designing algorithms for the most pessimistic input and start designing them for the systems they actually run on?</p>
 
         <figure class="blog-hero">
-            <img src="images/blog-phd-intern-2026.jpg" alt="Arghya (host) and Jinghao (co-host) with Mark (Ph.D. intern) at the Google Seattle Boren office">
-            <figcaption>Wrapping up the internship at the Google Seattle Boren office. From left to right: Jinghao (co-host), Mark (intern), and Arghya (host).</figcaption>
+            <div class="blog-hero-pair">
+                <img src="images/phd_convocation_with_michael_2025.jpg" alt="With Michael in Stony Brook doctoral regalia at commencement">
+                <img src="images/phd_defense_with_michael_2024.jpg" alt="With Michael at Stony Brook Computer Science building right after my defense">
+            </div>
+            <figcaption>Left: commencement. Right: defense.</figcaption>
         </figure>
 
-        <p>Bare metal maintenance is a multi-step workflow that crosses several independent control-plane systems. Each system keeps its own logs, so no single place showed the full story of a maintenance event. Over twelve weeks, we built tooling that brings those signals together. Here is what we achieved:</p>
+        <p>Classical analysis assumes a fixed amount of memory and an adversarial future. Real machines share memory across processes, and real workloads leave patterns that a model can learn. My thesis studies both:</p>
 
         <ul>
-            <li><b>End-to-end maintenance profiler:</b> We combined audit logs from several separate control-plane systems into one automated data pipeline, with fleet-level dashboards that track maintenance continuously instead of through one-off investigations.</li>
-            <li><b>Machine-level timeline profiler:</b> We built a tool that rebuilds the full timeline of a single host's maintenance session, step by step. Engineers can now debug unusual sessions and find exactly which step added the delay.</li>
-            <li><b>Firmware update analytics:</b> We built a dashboard that shows how host firmware and BIOS updates behave across the fleet, filterable by hardware pool, cluster, and time range.</li>
+            <li><b>Cache adaptivity:</b> We showed when cache-oblivious algorithms, such as matrix multiplication and sorting, stay efficient even when the memory available to them changes during execution (ESA'22). This matters for shared-memory machines and cloud systems, where memory is never constant.</li>
+            <li><b>Machine learning advice:</b> We designed online algorithms that use ML predictions to beat worst-case bounds when the predictions are good, and still keep guarantees when they are wrong. Examples include ski rental with a discount (WALCOM'22, Theoretical Computer Science 2022) and online list update with predictions (LATA at SIGMETRICS'23).</li>
+            <li><b>Theory that meets practice:</b> Both lines of work replace a single pessimistic number with performance bounds that track how good the environment or the advice is, which makes the guarantees useful to engineers.</li>
         </ul>
 
-        <p>One of the most valuable results was a corrected assumption. We started out believing that a single step of the workflow dominated maintenance time. Once the data was in one place, the picture turned out to be more nuanced, and that changed what we focus on next. The tools have been handed off to the team, and the project has since grown into a funded, full-time effort that is now part of our team's OKRs (objectives and key results).</p>
-
-        <p>Hosting a Ph.D. intern is one of the most rewarding parts of my job. Ph.D. students bring a researcher's habit of questioning the hypothesis before optimizing for it, and this project benefited directly from that. Thank you, Mark, for a fantastic summer. Thanks also to Jinghao for co-hosting, and to my colleagues who supported the project along the way.</p>
-
-        <p><i><b>P.S.</b> As of November 2026, Mark has received a full-time offer from Google and accepted it. He is all set to defend his thesis and return to Google!</i></p>
+        <p>I am grateful to my advisor, <a href="https://www3.cs.stonybrook.edu/~bender/">Prof. Michael A. Bender</a>, for six years of guidance and patience. Thank you to <a href="https://www3.cs.stonybrook.edu/~rezaul/">Prof. Rezaul A. Chowdhury</a> for chairing my committee, and to <a href="https://www.ams.stonybrook.edu/~jsbm/jsbm.html">Prof. Joseph S. B. Mitchell</a> and <a href="https://itshelenxu.github.io/">Prof. Helen Xu</a> for serving on it. I carry the same habit into my work at Google today: measure the real system first, then design for it.</p>
 
         <footer class="post-footer">
             <a href="../blogs.html" class="back-button">&larr; Back to Blogs</a>

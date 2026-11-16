@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hosting a Ph.D. Intern at Google Cloud, Summer 2026 - Arghya Bhattacharya</title>
+    <meta name="description" content="Reflections on hosting a Ph.D. intern on the Google Cloud Bare Metal team in summer 2026, and what we built to make fleet maintenance observable.">
+    <!-- This page lives in blogs/, so every top-level asset needs ../ -->
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" type="image/jpg" href="../images/ab_convocation.jpg">
+
+    <style>
+        /* ---------- Article header: dark banner, distinct from the light Blogs landing header ---------- */
+        .post-header {
+            position: relative;
+            margin: 0 0 32px 0;
+            padding: 28px 32px 32px 32px;
+            border-radius: 16px;
+            color: #fff;
+            background:
+                linear-gradient(135deg, rgba(23, 43, 77, 0.92), rgba(66, 133, 244, 0.85)),
+                url("images/mark_phd_intern_2026.jpg") center 40% / cover no-repeat;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .post-breadcrumb {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 18px;
+        }
+        .post-breadcrumb a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .post-tag {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.18);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .post-header h1 {
+            margin: 0 0 12px 0;
+            font-size: 32px;
+            line-height: 1.25;
+            color: #fff;
+        }
+        .post-meta {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* ---------- Back button ---------- */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #4285F4;
+            border-radius: 20px;
+            color: #4285F4;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .back-button:hover,
+        .back-button:focus {
+            background-color: #4285F4;
+            color: #fff;
+        }
+        .post-header .back-button {
+            margin-bottom: 18px;
+            border-color: #fff;
+            color: #fff;
+            background: transparent;
+        }
+        .post-header .back-button:hover,
+        .post-header .back-button:focus {
+            background: #fff;
+            color: #172b4d;
+        }
+
+        /* ---------- Article body ---------- */
+        .blog-post {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .blog-hero {
+            margin: 0 0 28px 0;
+            text-align: center;
+        }
+        .blog-hero img {
+            width: 100%;
+            max-width: 480px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .blog-hero figcaption {
+            color: #666;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .blog-post p,
+        .blog-post li {
+            line-height: 1.7;
+        }
+        .blog-post ul {
+            list-style-type: square;
+        }
+        .blog-post li {
+            margin-bottom: 10px;
+        }
+        .post-footer {
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .post-header { padding: 20px; }
+            .post-header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="../index.html">Home</a>
+    <a href="../experience.html">Work Experience</a>
+    <a href="../publications.html">Publications &amp; Talks</a>
+    <a href="../blogs.html" class="active">Blogs &amp; About</a>
+</nav>
+
+<main>
+    <article class="blog-post">
+        <header class="post-header">
+            <a href="../blogs.html" class="back-button">&larr; Back to Blogs</a>
+            <div class="post-breadcrumb"><a href="../blogs.html">Blogs</a> &rsaquo; Mentorship</div>
+            <span class="post-tag">Mentorship &middot; Google Cloud</span>
+            <h1>Hosting a Ph.D. Intern at Google Cloud: Summer 2026</h1>
+            <div class="post-meta">Arghya Bhattacharya &middot; September 2026 &middot; Seattle, WA &middot; 3 min read</div>
+        </header>
+
+        <p>This summer, I hosted <a href="https://www.linkedin.com/in/stheera/">Mark Theeranantachai</a>, a final-year Ph.D. candidate at UCLA, as a Ph.D. intern on the Google Cloud Bare Metal team in Seattle. My teammate on the GCE Bare Metal team, <a href=https://www.linkedin.com/in/jinghaozhao/> Dr. Jinghao Zhao</a>, co-hosted the internship with me. Our project started with a simple question: when we maintain a large fleet of bare metal servers, where does the time actually go? Every minute a host spends in maintenance is a minute a customer can't use it, so answering that question well matters.</p>
+
+        <figure class="blog-hero">
+            <img src="images/mark_phd_intern_2026.jpg" alt="Arghya (host) and Jinghao (co-host) with Mark (Ph.D. intern) at the Google Seattle Boren office">
+            <figcaption>Wrapping up the internship at the Google Seattle Boren office. From left to right: Jinghao (co-host), Mark (intern), and Arghya (host).</figcaption>
+        </figure>
+
+        <p>Bare metal maintenance is a multi-step workflow that crosses several independent control-plane systems. Each system keeps its own logs, so no single place showed the full story of a maintenance event. Over twelve weeks, we built tooling that brings those signals together. Here is what we achieved:</p>
+
+        <ul>
+            <li><b>End-to-end maintenance profiler:</b> We combined audit logs from several separate control-plane systems into one automated data pipeline, with fleet-level dashboards that track maintenance continuously instead of through one-off investigations.</li>
+            <li><b>Machine-level timeline profiler:</b> We built a tool that rebuilds the full timeline of a single host's maintenance session, step by step. Engineers can now debug unusual sessions and find exactly which step added the delay.</li>
+            <li><b>Firmware update analytics:</b> We built a dashboard that shows how host firmware and BIOS updates behave across the fleet, filterable by hardware pool, cluster, and time range.</li>
+        </ul>
+
+        <p>One of the most valuable results was a corrected assumption. We started out believing that a single step of the workflow dominated maintenance time. Once the data was in one place, the picture turned out to be more nuanced, and that changed what we focus on next. The tools have been handed off to the team, and the project has since grown into a funded, full-time effort that is now part of our team's OKRs (objectives and key results).</p>
+
+        <p>Hosting a Ph.D. intern is one of the most rewarding parts of my job. Ph.D. students bring a researcher's habit of questioning the hypothesis before optimizing for it, and this project benefited directly from that. Thank you, Mark, for a fantastic summer. Thanks also to Jinghao for co-hosting, and to my colleagues who supported the project along the way.</p>
+
+        <p><i><b>P.S.</b> As of November 2026, Mark has received a full-time offer from Google and accepted it. He is all set to defend his thesis and return to Google!</i></p>
+
+        <footer class="post-footer">
+            <a href="../blogs.html" class="back-button">&larr; Back to Blogs</a>
+        </footer>
+    </article>
+</main>
+
+</body>
+</html>
