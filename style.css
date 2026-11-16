@@ -497,3 +497,29 @@ ul, ol {
 .resume-btn:active {
     transform: scale(0.97); 
 }
+
+/* Adding Email Badge*/
+.email-badge-container {
+  display: flex;
+  gap: 15px; /* Keeps them perfectly spaced next to each other */
+  align-items: center;
+  flex-wrap: wrap; /* Ensures they stack neatly on mobile screens */
+  margin-top: 10px; 
+  margin-bottom: 20px; 
+  justify-content: center;
+}
+
+.email-badge {
+  background-color: #f3f4f6; /* A soft, subtle gray background */
+  color: #ffffff; /* Dark gray text for high contrast */
+  padding: 8px 16px;
+  border-radius: 6px; /* Gives it that clean "button" shape */
+  font-family: monospace; /* Perfect for engineers, makes I, l, and 1 distinct */
+  font-size: 0.95em;
+  border: 1px solid #d1d5db; /* A crisp, subtle border */
+  
+  /* The magic touch: one click highlights the whole email */
+  -webkit-user-select: all;
+  user-select: all; 
+}
+
