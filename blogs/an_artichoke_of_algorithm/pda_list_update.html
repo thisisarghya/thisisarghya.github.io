@@ -3,424 +3,1576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Technical Analysis: Online List Update with Predictions</title>
+    <title>Online List Update with Predictions: TwoHops &amp; PDA - Arghya Bhattacharya</title>
+    <meta name="description" content="Technical deep dive into learning-augmented online list update: Move-To-Front, Reingold-Westbrook paid exchanges, NP-hardness, and the TwoHops / Penalty Distance Algorithm (PDA) with interactive brute-force simulators.">
+    <!-- This page lives in blogs/an_artichoke_of_algorithm/, so every top-level asset needs ../../ -->
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="icon" type="image/jpg" href="../../images/artichoke.jpg">
 
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
     <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
-        /* Scoped Navigation Menu Styling */
-        .main-nav {
-            background: #f4f4f4;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            margin-top: 20px;
-            text-align: center;
-            font-weight: bold;
-            width: 100%;
-            max-width: 800px; /* Matches your article-content max-width */
-            box-sizing: border-box;
+        /* ---------- Palette ---------- */
+        :root {
+            --pda-navy: #172b4d;
+            --pda-blue: #4285F4;
+            --pda-green: #1e8e3e;
+            --pda-green-bg: #e6f4ea;
+            --pda-yellow: #f9ab00;
+            --pda-yellow-bg: #fef7e0;
+            --pda-red: #d93025;
+            --pda-red-bg: #fce8e6;
+            --pda-gray: #5f6368;
+            --pda-gray-bg: #eef0f2;
+            --pda-ink: #2c3e50;
+            --pda-muted: #5f6368;
+            --pda-line: #dadce0;
+            --pda-soft: #f1f3f4;
+            --pda-card: #ffffff;
         }
 
-        .main-nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #0056b3;
-            display: inline-block; /* Helps with spacing on mobile */
-            padding: 5px 0;
+        /* ---------- Article header: dark banner, matching site blog template ---------- */
+        .post-header {
+            position: relative;
+            margin: 0 0 32px 0;
+            padding: 28px 32px 32px 32px;
+            border-radius: 16px;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(23, 43, 77, 0.94), rgba(66, 133, 244, 0.86));
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
-
-        .main-nav a:hover {
+        .post-breadcrumb {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 18px;
+        }
+        .post-breadcrumb a {
+            color: #fff;
             text-decoration: underline;
         }
-
-        .blog-header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 40px 20px;
+        .post-tag {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.18);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            display: flex;
-            flex-direction: column;
+        .post-header h1 {
+            margin: 0 0 12px 0;
+            font-size: 31px;
+            line-height: 1.25;
+            color: #fff;
+        }
+        .post-meta {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* ---------- Back button ---------- */
+        .back-button {
+            display: inline-flex;
             align-items: center;
-            padding: 2rem;
-            margin: 0;
-        }
-
-        /* Styling for the converted Markdown article */
-        .article-content {
-            background: white;
-            padding: 2rem 3rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 3rem;
-            max-width: 800px;
-            width: 100%;
-            line-height: 1.6;
-            box-sizing: border-box;
-        }
-
-        .article-content h1 {
-            color: #2c3e50;
-            font-size: 2.2rem;
-            margin-top: 0;
-            border-bottom: 2px solid #ecf0f1;
-            padding-bottom: 10px;
-        }
-
-        .article-content h2 { color: #2980b9; margin-top: 1.5rem; }
-        .article-content h3 { color: #34495e; margin-top: 1.2rem; }
-        .article-content h4 { color: #2c3e50; }
-        
-        .article-content ul { padding-left: 20px; }
-        .article-content li { margin-bottom: 8px; }
-        
-        .article-content blockquote {
-            border-left: 4px solid #3498db;
-            background: #f8f9fa;
-            padding: 1rem;
-            margin: 1.5rem 0;
-            color: #555;
-            font-style: italic;
-            border-radius: 0 4px 4px 0;
-        }
-
-        .article-content hr {
-            border: 0;
-            height: 1px;
-            background: #ddd;
-            margin: 2rem 0;
-        }
-
-        .article-content a {
-            color: #3498db;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #4285F4;
+            border-radius: 20px;
+            color: #4285F4;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 500;
             text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
         }
-        .article-content a:hover { text-decoration: underline; }
+        .back-button:hover,
+        .back-button:focus {
+            background-color: #4285F4;
+            color: #fff;
+        }
+        .post-header .back-button {
+            margin-bottom: 18px;
+            border-color: #fff;
+            color: #fff;
+            background: transparent;
+        }
+        .post-header .back-button:hover,
+        .post-header .back-button:focus {
+            background: #fff;
+            color: #172b4d;
+        }
 
-        /* Simulator Styling below */
-        h1.sim-title { color: #2c3e50; margin-top: 0; }
+        /* ---------- Article body ---------- */
+        .blog-post {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .blog-post p,
+        .blog-post li {
+            line-height: 1.7;
+        }
+        .blog-post ul {
+            list-style-type: square;
+        }
+        .blog-post li {
+            margin-bottom: 10px;
+        }
+        .post-footer {
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
 
-        .sequence-container {
-            background: white;
-            padding: 1rem 2rem;
+        /* ---------- Callouts & Conjectures ---------- */
+        .callout {
+            margin: 22px 0;
+            padding: 16px 20px;
+            border-left: 4px solid var(--pda-blue);
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            text-align: center;
-            max-width: 800px;
+            background: #e8f0fe;
+        }
+        .callout.note { border-color: var(--pda-muted); background: var(--pda-soft); font-size: 15px; }
+        .callout.tldr { border-color: var(--pda-green); background: var(--pda-green-bg); }
+        .callout.thm  { border-color: #9334E6; background: #f3e8fd; }
+        .callout strong:first-child { display: block; margin-bottom: 4px; color: var(--pda-navy); }
+
+        /* ---------- Tables ---------- */
+        .compare {
             width: 100%;
-            box-sizing: border-box;
+            border-collapse: collapse;
+            font-size: 14.5px;
+            margin: 20px 0;
+            background: #fff;
+        }
+        .compare th, .compare td {
+            padding: 9px 11px;
+            border: 1px solid var(--pda-line);
+            vertical-align: top;
+            text-align: left;
+        }
+        .compare th {
+            background: var(--pda-soft);
+            color: var(--pda-navy);
+            font-weight: 700;
+        }
+        .compare td:first-child {
+            font-weight: 600;
         }
 
+        /* ---------- Inline color pills ---------- */
+        .pill {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+            vertical-align: baseline;
+        }
+        .pill.green { background: var(--pda-green-bg); color: var(--pda-green); border: 1px solid #a8dab5; }
+        .pill.red   { background: var(--pda-red-bg); color: var(--pda-red); border: 1px solid #f6aea9; }
+        .pill.gray  { background: var(--pda-gray-bg); color: var(--pda-gray); border: 1px solid #d2d5d9; }
+        .pill.blue  { background: #e8f0fe; color: #1967d2; border: 1px solid #aecbfa; }
+
+        /* ---------- Interactive figure shell ---------- */
+        .figure {
+            margin: 28px 0 34px 0;
+            padding: 20px;
+            border: 1px solid var(--pda-line);
+            border-radius: 14px;
+            background: #fafbfc;
+        }
+        .figure-title {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--pda-navy);
+            text-align: center;
+        }
+        .figure-caption {
+            margin-top: 12px;
+            font-size: 13.5px;
+            color: var(--pda-muted);
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn {
+            padding: 6px 13px;
+            border: 1px solid var(--pda-blue);
+            border-radius: 18px;
+            background: #fff;
+            color: var(--pda-blue);
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.18s, color 0.18s, opacity 0.18s;
+        }
+        .btn:hover, .btn:focus-visible { background: #e8f0fe; outline: none; }
+        .btn.active { background: var(--pda-blue); color: #fff; }
+        .btn.action { background: var(--pda-green); border-color: var(--pda-green); color: #fff; font-weight: 600; }
+        .btn.action:hover { background: #187332; }
+        .btn.danger { border-color: var(--pda-red); color: var(--pda-red); }
+        .btn.danger.active { background: var(--pda-red); color: #fff; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* ---------- Figure 1: Two-Hop 6-Pattern Explorer ---------- */
+        .hop-tape {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 14px 0;
+            flex-wrap: wrap;
+        }
+        .hop-token {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+            font-size: 14px;
+            font-weight: 700;
+            border: 2px solid var(--pda-line);
+            background: #fff;
+        }
+        .hop-token.now { background: #172b4d; color: #fff; border-color: #172b4d; }
+        .hop-token.tok-a { background: #fff8e1; color: #b06000; border-color: #f9ab00; }
+        .hop-token.tok-x { background: #e8f0fe; color: #1967d2; border-color: #4285F4; }
+        .hop-arrow { color: #9aa0a6; font-weight: 700; }
+        .hop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .hop-box {
+            background: #fff;
+            border: 1px solid var(--pda-line);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .hop-box.win { border: 2px solid var(--pda-green); box-shadow: 0 2px 8px rgba(30,142,62,0.12); }
+        .hop-box h4 { margin: 0 0 6px 0; font-size: 14px; color: var(--pda-navy); }
+        .hop-score { font-size: 20px; font-weight: 800; color: var(--pda-ink); margin: 4px 0; }
+        .hop-explain {
+            margin-top: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px solid var(--pda-line);
+            font-size: 14px;
+        }
+
+        /* ---------- Figure 2: Canonical Coloring Moves ---------- */
+        .canon-stage {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: center;
+            background: #fff;
+            border: 1px solid var(--pda-line);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .canon-col h4 {
+            margin: 0 0 10px 0;
+            font-size: 13.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--pda-muted);
+            text-align: center;
+        }
+        .canon-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .c-chip {
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            border: 2px solid transparent;
+            min-width: 36px;
+            text-align: center;
+        }
+        .c-chip.green { background: var(--pda-green-bg); color: var(--pda-green); border-color: #81c995; }
+        .c-chip.red   { background: var(--pda-red-bg); color: var(--pda-red); border-color: #f28b82; }
+        .c-chip.req   { background: #1967d2; color: #fff; border-color: #174ea6; box-shadow: 0 2px 6px rgba(25,103,210,0.3); }
+        .canon-mid {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--pda-blue);
+            text-align: center;
+            padding: 0 4px;
+        }
+        .canon-mid small {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--pda-muted);
+        }
+
+        /* ---------- Figure 3: Multi-Algorithm & Brute-Force Arena ---------- */
+        .sim-Subbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border: 1px solid var(--pda-line);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            font-size: 13.5px;
+        }
+        .custom-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        .custom-bar input {
+            padding: 5px 9px;
+            border: 1px solid var(--pda-line);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .seq-box {
+            background: #fff;
+            border: 1px solid var(--pda-line);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .seq-label {
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--pda-muted);
+            margin-bottom: 8px;
+        }
         .sequence {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
+            gap: 6px;
             justify-content: center;
         }
-
         .seq-item {
-            background: #ecf0f1;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            color: #7f8c8d;
+            background: var(--pda-soft);
+            padding: 6px 11px;
+            border-radius: 6px;
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+            font-weight: 700;
+            font-size: 14px;
+            color: #5f6368;
+            border: 1px solid transparent;
+            transition: transform 0.15s, background-color 0.15s;
         }
-
         .seq-item.active {
-            background: #3498db;
-            color: white;
+            background: var(--pda-blue);
+            color: #fff;
             transform: scale(1.1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 6px rgba(66,133,244,0.35);
         }
-
         .seq-item.past {
             background: #2c3e50;
-            color: white;
-            opacity: 0.5;
+            color: #fff;
+            opacity: 0.45;
         }
 
-        .controls { margin-bottom: 2rem; }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: white;
-            background-color: #2ecc71;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin: 0 5px;
+        .opt-banner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+            background: #172b4d;
+            color: #fff;
+            font-size: 13.5px;
         }
-
-        button:hover { background-color: #27ae60; }
-        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
-        button.reset { background-color: #e74c3c; }
-        button.reset:hover { background-color: #c0392b; }
+        .opt-banner code {
+            color: #8ab4f8;
+            font-weight: 700;
+        }
 
         .panels {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
         }
-
         .panel {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            width: 220px;
+            background: #fff;
+            padding: 12px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--pda-line);
             text-align: center;
+            display: flex;
+            flex-direction: column;
         }
-
+        .panel.pda-main {
+            border: 2px solid var(--pda-blue);
+            box-shadow: 0 3px 10px rgba(66,133,244,0.12);
+        }
+        .panel h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            color: var(--pda-navy);
+        }
+        .panel-sub {
+            font-size: 11px;
+            color: var(--pda-muted);
+            min-height: 26px;
+            margin-bottom: 6px;
+        }
         .cost {
-            font-size: 1.2rem;
-            font-weight: bold;
+            font-size: 18px;
+            font-weight: 800;
             color: #e67e22;
-            margin-bottom: 15px;
         }
-
+        .cost-breakdown {
+            font-size: 11px;
+            color: var(--pda-muted);
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
         .list-state {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
-
         .list-item {
-            background: #ecf0f1;
-            padding: 15px;
-            border-radius: 5px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            background: var(--pda-soft);
+            padding: 8px 9px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            font-weight: 700;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            border: 1.5px solid transparent;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .list-item .pos-idx {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--pda-muted);
+        }
+        .list-item.highlight {
+            border-color: var(--pda-blue);
+            box-shadow: 0 0 0 2px rgba(66,133,244,0.22);
+        }
+        .list-item.col-green { background: var(--pda-green-bg); color: var(--pda-green); border-color: #81c995; }
+        .list-item.col-red   { background: var(--pda-red-bg); color: var(--pda-red); border-color: #f28b82; }
+        .list-item.col-gray  { background: var(--pda-gray-bg); color: #3c4043; border-color: #dadce0; }
+        .list-item.col-req   { background: #e8f0fe; color: #1967d2; border-color: #4285F4; }
+
+        .step-log {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 9px;
+            background: #fff;
+            border: 1px solid var(--pda-line);
+            font-size: 13.5px;
+            min-height: 40px;
         }
 
-        .list-item.highlight {
-            background: #f1c40f;
-            color: white;
+        /* Brute-Force Configuration Inspector */
+        .bf-details {
+            margin-top: 12px;
+            background: #fff;
+            border: 1px solid var(--pda-line);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+        .bf-details summary {
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13.5px;
+            color: var(--pda-navy);
+        }
+        .bf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            margin-top: 10px;
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+        }
+        .bf-table th, .bf-table td {
+            padding: 6px 8px;
+            border: 1px solid var(--pda-line);
+            text-align: center;
+        }
+        .bf-table th { background: var(--pda-soft); font-family: inherit; }
+        .bf-table tr.bf-winner {
+            background: var(--pda-green-bg);
+            font-weight: 700;
+        }
+
+        /* ---------- References ---------- */
+        .ref-list {
+            font-size: 14px;
+            padding-left: 22px;
+        }
+        .ref-list li {
+            margin-bottom: 8px;
+            line-height: 1.55;
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 760px) {
+            .post-header { padding: 20px; }
+            .post-header h1 { font-size: 24px; }
+            .hop-grid { grid-template-columns: 1fr; }
+            .canon-stage { grid-template-columns: 1fr; }
+            .canon-mid { transform: rotate(90deg); margin: 4px 0; }
+            .panels { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .panels { grid-template-columns: 1fr; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
         }
     </style>
 </head>
-
 <body>
 
-<nav class="main-nav">
+<nav>
     <a href="../../index.html">Home</a>
     <a href="../../experience.html">Work Experience</a>
-    <a href="../../publications.html">Publications & Talks</a>
-    <a href="../../blogs.html" class="active">Blogs & About</a>
+    <a href="../../publications.html">Publications &amp; Talks</a>
+    <a href="../../blogs.html" class="active">Blogs &amp; About</a>
 </nav>
-    <div class="article-content">
-    <h1>Technical Analysis: Online List Update with Predictions</h1>
 
-    <ul>
-        <li><strong>Author:</strong> Arghya Bhattacharya, Google Cloud, USA</li>
-        <li><strong>Date:</strong> September 15, 2024</li>
-    </ul>
+<main>
+    <article class="blog-post">
+        <header class="post-header">
+            <a href="../../an_artichoke_of_algorithm.html" class="back-button">&larr; Back to An Artichoke of Algorithm</a>
+            <div class="post-breadcrumb"><a href="../../an_artichoke_of_algorithm.html">An Artichoke of Algorithm</a> &rsaquo; Algorithms</div>
+            <span class="post-tag">Algorithms &middot; ML Advice</span>
+            <h1>Online List Update with Predictions: TwoHops &amp; the Penalty Distance Algorithm</h1>
+            <div class="post-meta">Arghya Bhattacharya &middot; September 15, 2024 &middot; <span id="read-time">9</span> min read</div>
+        </header>
 
-    <p><em>Note: The following content is built on, expanded, and made more detailed from a poster presentation in Learning-augmented Algorithms: Theory and Applications (LATA) at ACM SIGMETRICS 2023 (<a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf" target="_blank">link</a>). I co-authored the article with <a href="https://itshelenxu.github.io/"> Dr. Helen Xu</a>, who was a PostDoc back then at Lawrence Berkeley National Laboratory (Berkeley Lab), and now is an Assistant Prof. at Georgia Tech and <a href="https://sites.google.com/corp/view/shahinkamali/home"> Dr. Shahin Kamali</a>, who is an Associate Prof. (he was an Assistant Prof.) at York University.</em></p>
-        
-    <h2>0. Context</h2>
-    <p>Before diving into the mechanics of the PDA algorithm, it is important to establish the traditional framework of online algorithms and contrast it with the more recently developed ML-advised paradigm.</p>
-    
-    <p>Traditionally, an <strong>online algorithm</strong> is defined by its lack of futuristic knowledge. It must serve an input sequence of requests sequentially—making irrevocable decisions and modifying the system state for each request before moving on to the next. Because it operates entirely without foresight, its performance is typically measured using a framework called <strong>competitive analysis</strong>, where the online algorithm's cost is compared against an optimal offline algorithm (OPT) that has full access to the entire future request sequence.</p>
+        <div class="callout note">
+            <strong>Research lineage</strong>
+            Expanded from our poster presentation <em>Online List Update with Predictions</em> [1] at the ACM SIGMETRICS 2023 Workshop on
+            Learning-augmented Algorithms: Theory and Applications (LATA)
+            (<a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf" target="_blank" rel="noopener">abstract PDF</a>),
+            co-authored with <a href="https://itshelenxu.github.io/" target="_blank" rel="noopener">Dr. Helen Xu</a> (Assistant Professor at Georgia Tech, previously PostDoc at Berkeley Lab) and
+            <a href="https://sites.google.com/view/shahinkamali/home" target="_blank" rel="noopener">Dr. Shahin Kamali</a> (Associate Professor at York University), and Chapter 5 of my doctoral dissertation [2].
+        </div>
 
-    <p>Recently, a new direction has emerged in the study of online algorithms: the <strong>Machine Learning (ML) advice model</strong>. These algorithms are referred to as learning-augmented or ML-advised algorithms or algorithms with predictions. In this modern framework, the strict assumption of zero futuristic knowledge is relaxed. Instead, the online algorithm is augmented with an "advisor" or "oracle"—often a trained machine learning model—that provides predictions about future requests. The algorithm can then incorporate this potentially faulty advice into its online decision-making process, aiming to achieve performance that surpasses traditional deterministic lower bounds when predictions are accurate, while maintaining robustness when the advice fails.</p>
+        <div class="callout tldr">
+            <strong>TL;DR</strong>
+            Without foresight, deterministic online list update hits a hard wall at competitive ratio $2$ (<strong>Move-To-Front</strong>), randomized algorithms stall at the $1.6$ projective barrier (<strong>Comb</strong>), and even with full offline knowledge the problem is <strong>NP-hard</strong>. We introduce <strong>TwoHops</strong>—also called the <strong>Penalty Distance Algorithm (PDA)</strong>—which queries an untrusted oracle for just the <em>next two occurrences</em> of each accessed item, colors the remaining items <span class="pill green">Green</span>, <span class="pill gray">Gray</span>, or <span class="pill red">Red</span>, and balances <strong>paid-exchange distance</strong> against <strong>inversion penalty</strong>. Even without paid swaps, <strong>TwoHopsNoPaid</strong> breaks the deterministic lower bound of $2$; with paid swaps, we conjecture full PDA achieves competitive ratio $\le 1.6$ while remaining worst-case robust when combined with Move-To-Front.
+        </div>
 
-        <h2>1. Introduction to the List Update Problem</h2>
-        <p>In the list update problem, the input is an online sequence of access requests to items in a static linked list. To serve a request to an item at position \(i\), an online algorithm makes a linear scan of the list until it finds the item; this linear scan has an access cost of \(i\). After accessing the item, the algorithm may or may not reorganize the list to minimize the total cost of future accesses. For this, an algorithm has two choices for a reorganization of the list, i.e., two types of operations at its disposal:
+        <h2>0. Context: From Zero Foresight to ML Advice</h2>
+        <p>
+            Traditionally, an <strong>online algorithm</strong> is defined by its complete lack of futuristic knowledge. It serves an input sequence of requests $\sigma = \langle \sigma_1, \sigma_2, \dots, \sigma_m \rangle$ one by one—making irrevocable decisions and mutating system state after each request before seeing the next. Performance is measured via <strong>competitive analysis</strong> [3]: an online algorithm $\mathcal{A}$ is $c$-competitive if, on every sequence $\sigma$, its cost satisfies $\mathcal{A}(\sigma) \le c \cdot \text{OPT}(\sigma) + \alpha$ against an omniscient offline optimum $\text{OPT}$ that sees all of $\sigma$ upfront.
+        </p>
+        <p>
+            Worst-case adversaries are pessimistic because real workloads leave statistical footprints. The <strong>Machine Learning (ML) advice model</strong> (or <em>learning-augmented algorithms</em> [10]) relaxes the zero-foresight assumption by giving the online algorithm an untrusted "oracle"—such as a lightweight ML predictor—and evaluating three properties simultaneously:
+        </p>
         <ul>
-            <li><strong>Free Exchange:</strong> Moves the currently accessed item anywhere closer to the front of the list with a cost of 0.</li>
-            <li><strong>Paid Exchange:</strong> Swaps the positions of any two consecutive items in the list with a unit cost of 1. The algorithms can make any number of paid exchanges</li>
-        </ul>
-        Given an input request sequence, a list update algorithm's objective is to maintain the list in a way that minimizes the total cost (i.e., the sum of costs for all accesses and paid exchanges).</p>
-
-        <p>While early literature assumed an optimal offline algorithm (OPT) would never perform paid exchanges, Reingold and Westbrook disproved this. For example, if the initial list is (1,2,3) and the request sequence is <3,2,2,3>, any algorithm using only free exchanges pays a cost of at least 9. However, by paying a cost of 2 upfront to execute two paid exchanges and alter the list to (2,3,1), the total cost reduces to 8.</p>
-
-        <h3>State-of-the-Art Algorithms</h3>
-        <p>Without futuristic knowledge, algorithms must rely on online heuristics. <strong>Move-To-Front (MTF)</strong>, which moves an accessed item to the front of the list using a free exchange, is 2-competitive and is the best a deterministic algorithm can achieve. Other deterministic approaches like <em>Frequency Count (FC)</em> and <em>Transpose</em> fail to achieve a constant competitive ratio. Randomized algorithms (such as <em>Bit</em>, <em>Comb</em>, and <em>Random-Reset</em>) assign probabilities to confuse adaptive adversaries, achieving competitive ratios hovering between 1.6 and 1.75.</p>
-
-        <h2>2. The Penalty Distance Algorithm (PDA)</h2>
-        <p>We consider the classic list update problem under a prediction setting, where, upon accessing any item \(x\), a possibly faulty oracle predicts the next two times (indices in the input sequence) where \(x\) is requested again. We design a prediction model where the list update algorithm has access to predictions concerning the next two occurrences of the requested item in the request sequence. We refer to this algorithm as Penalty Distance Algorithm (PDA).</p>
-
-        <h3>2.1 Algorithmic Mechanics</h3>
-        <p>As each request is served, the list goes from one state to another through some paid exchanges and free exchanges. For that, PDA considers every possible configuration (ordering) of the list and computes two types of costs for each configuration, which we refer to as distance and penalty costs. PDA chooses the configuration that minimizes the sum of the penalty and the distance.</p>
-
-        <ul>
-            <li><strong>Penalty Cost:</strong> The idea behind penalty cost is to maintain an ideal configuration of the list that is aligned with an optimal ordering for lists of length 2 formed by the requested item and other items. Any violation of the ideal ordering in the above scheme translates to one unit of "penalty" in the PDA algorithm. For each possible configuration \(C\) of the list, it computes the number of items whose ordering with \(x\) in \(C\) is not ideal.</li>
-            <li><strong>Distance Cost:</strong> PDA also computes the distance of \(C\) from the current configuration, defined as the minimum number of free and paid exchanges to convert the current configuration of the list to \(C\).</li>
+            <li><strong>Consistency ($\eta = 0$):</strong> Breaking classical online lower bounds when predictions are accurate.</li>
+            <li><strong>Smoothness ($\eta > 0$):</strong> Degrading gracefully as prediction error $\eta$ increases.</li>
+            <li><strong>Robustness ($\eta \to \infty$):</strong> Retaining a bounded competitive guarantee even when the oracle fails catastrophically.</li>
         </ul>
 
-        <h4>Ideal Ordering Logic (2-Item Cases)</h4>
-        <p>Suppose \(b\) is the requested item, and let \(a\) be any item. If the current ordering is \((a, b)\), and the next three requests are predicted to be \((b, b, a,...)\), then \(a\) should be located after \(b\) in an ideal list. On the other hand, if the next three requests are predicted to be \(\langle a,a,b,\cdot\cdot\cdot\rangle\), then \(a\) should be located before \(b\) in an ideal list.</p>
-
-        <p>For lists of two items, correct predictions about the next request ensure optimality via a simple algorithm that only uses free exchanges: for a list formed by items \(a\) and \(b\), whenever there is a request to an item, say \(b\), in the second position, move it to the front if and only if the next request to \(b\) appears earlier than the next request to \(a\).</p>
-
-        <p>However, simple predictions about the next request reach their limit for lists of length 3. To make such decisions [regarding optimal free and paid exchanges], however, the algorithm requires the next two requests for each item.</p>
-
-        <h3>2.2 Conjecture 1 (Competitive Ratio)</h3>
-        <p>We are working on proof to show the following upper bound for the competitive ratio of PDA. If correct, the algorithm improves the best existing approximation algorithm with an approximation factor of 1.6 [6].</p>
-
-        <blockquote><strong>Conjecture 1.</strong> When the prediction is correct, using the proper potential function for the analysis, we show PDA's competitive ratio is \(\le1.6\).</blockquote>
-
-        <h2>3. Comparison: List Update vs. Caching (LRU)</h2>
-        <p>The paper investigates the list update problem in light of the recent development for the caching problem under a prediction model. Both List Update and Caching are foundational problems in the analysis of online algorithms.</p>
-
+        <h2>1. The List Update Problem, Paid Swaps &amp; Brute-Force Limits</h2>
+        <p>
+            In the classic <strong>list update problem</strong> [3], we maintain an unsorted linked list $L$ of $\ell$ distinct items. To serve a request for item $x$ currently sitting at $1$-based index $i$, the algorithm linearly probes $L$ from the head until reaching $x$. Literature analyzes two closely related access-cost conventions:
+        </p>
         <ul>
-            <li><strong>Similarity in Intuition:</strong> The Least Recently Used (LRU) algorithm for caching has a competitive ratio of \(k\) for a cache of size \(k\) [12]. Essentially, LRU and MTF both prefer to keep the recently used items handy.</li>
-            <li><strong>The Critical Difference:</strong> The list update problem is NP-hard [2]. This is in contrast to the paging (caching) problem, where correct predictions about the next request ensure optimality via Belady’s rule (the simple algorithm that evicts the page that is requested furthest).</li>
-            <li><strong>Limits of Prediction:</strong> While perfect lookahead guarantees optimality in caching, it does not do so for List Update when the list length \(N > 2\). Even if predictions are correct, we cannot hope for optimal solutions. As noted in Section 2.1, simple predictions about the next request are insufficient for list lengths of 3, potentially requiring paid exchanges to achieve optimality, which necessitates predictions about the next two requests for each item.</li>
+            <li><strong>Full (Standard) Cost Model:</strong> Probing index $i$ costs $i$ (so the head of the list costs $1$).</li>
+            <li><strong>Partial Cost Model:</strong> Probing index $i$ costs $i - 1$, stripping the unavoidable $+1$ per request paid by every algorithm including $\text{OPT}$. Theoretical proofs prefer partial cost because total access cost decomposes cleanly into pairwise inversions, though any $c$-competitive bound in partial cost immediately implies $c$-competitiveness in full cost. (All concrete examples below report full cost first and partial cost in parentheses.)</li>
+        </ul>
+        <p>
+            After probing $x$, the algorithm reorganizes $L$ to cheapen future probes using two primitives:
+        </p>
+        <ul>
+            <li><strong>Free Exchange (cost $0$):</strong> Move the just-accessed item $x$ anywhere closer to the front of $L$.</li>
+            <li><strong>Paid Exchange (cost $1$ each):</strong> Swap any two adjacent items in $L$. Paid exchanges may be executed in any number.</li>
         </ul>
 
-        <p>PDA seeks a consistent algorithm (good competitive ratio with correct predictions) that can be combined with Move-To-Front (MTF) to offer a Pareto-efficient solution that is robust when predictions are faulty.</p>
+        <h3>Why Paid Exchanges Exist: Reingold &amp; Westbrook's Counterexample</h3>
+        <p>
+            Early work by Sleator and Tarjan conjectured that even an omniscient offline optimum $\text{OPT}$ never needs paid exchanges. <strong>Reingold and Westbrook</strong> [4] disproved this. Consider initial list $L_0 = (1, 2, 3)$ and request sequence $\sigma = \langle 3, 2, 2, 3 \rangle$:
+        </p>
+        <ul>
+            <li><strong>Free Exchanges Only:</strong> Probing $3$ first costs $3$. Whether $3$ stays at index $3$ (serving $\langle 2, 2, 3 \rangle$ at costs $2 + 1 + 3 = 6$) or free-jumps to the head $(3, 1, 2)$ (serving $\langle 2, 2, 3 \rangle$ at costs $3 + 1 + 2 = 6$), every free-exchange-only schedule pays at least <strong>$9$</strong> (partial cost $5$).</li>
+            <li><strong>With Paid Exchanges:</strong> Paying $2$ upfront to execute two paid swaps $(1, 2, 3) \to (2, 1, 3) \to (2, 3, 1)$ lets $\langle 3, 2, 2, 3 \rangle$ be served at positions $\langle 2, 1, 1, 2 \rangle$ with zero further moves—cutting total cost to $2 + (2 + 1 + 1 + 2) = \mathbf{8}$ (partial cost $4$).</li>
+        </ul>
+        <p>
+            Computing $\text{OPT}(\sigma)$ offline requires dynamic programming over all $\ell!$ list permutations—running in brute-force exponential time $\Theta(2^\ell (\ell - 1)! m)$ via Reingold and Westbrook's subset-transfer characterization [4]—and <strong>Ambühl proved in 2000 that Offline List Update is NP-hard</strong> [5].
+        </p>
+
+        <h3>State-of-the-Art Without Predictions</h3>
+        <p>
+            Without foresight, deterministic heuristics cannot beat $2$, and randomized algorithms assign probabilities over state bits to confuse oblivious adversaries:
+        </p>
+        <table class="compare">
+            <thead>
+                <tr>
+                    <th>Algorithm</th>
+                    <th>Type</th>
+                    <th>Core Rule</th>
+                    <th>Competitive / Approx. Bound</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Move-To-Front (MTF) [3]</td>
+                    <td>Deterministic online</td>
+                    <td>Free-move accessed $x$ to index $1$ on every request.</td>
+                    <td>$2$-competitive (exact $2 - \frac{2}{\ell+1}$ in full cost; optimal deterministic).</td>
+                </tr>
+                <tr>
+                    <td>Frequency Count &amp; Transpose [3]</td>
+                    <td>Deterministic online</td>
+                    <td>Sort by request count, or swap accessed $x$ one slot forward.</td>
+                    <td>$\Omega(\ell)$-competitive (unbounded as list length grows).</td>
+                </tr>
+                <tr>
+                    <td>Timestamp $\text{TS}(0)$ [7]</td>
+                    <td>Deterministic online</td>
+                    <td>Move $x$ ahead of the first item requested $\le 1$ time since $x$'s last access.</td>
+                    <td>$2$-competitive (backward-looking two-request intuition).</td>
+                </tr>
+                <tr>
+                    <td>Bit &amp; Counter [6]</td>
+                    <td>Randomized online</td>
+                    <td>Maintain random per-item state bits; move-to-front when bit flips to $0$.</td>
+                    <td>$1.75$-competitive (Bit); $\sqrt{3} \approx 1.732$ (Counter / Random-Reset).</td>
+                </tr>
+                <tr>
+                    <td>Comb [7, 9]</td>
+                    <td>Randomized online</td>
+                    <td>Run Bit with probability $4/5$ and $\text{TS}(0)$ with probability $1/5$.</td>
+                    <td>$1.6$-competitive (tight lower bound for all projective algorithms [9]; Teia proved $1.5$ overall [8]).</td>
+                </tr>
+                <tr>
+                    <td>Reingold–Westbrook DP [4]</td>
+                    <td>Exact offline brute-force</td>
+                    <td>Shortest path / subset-transfer DP over all $\ell!$ list states.</td>
+                    <td>$1.0$ (exact $\text{OPT}$), but $\Theta(2^\ell (\ell - 1)! m)$ time; NP-hard [5].</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>2. TwoHops / The Penalty Distance Algorithm (PDA)</h2>
+        <p>
+            Can lightweight ML predictions smash through MTF's deterministic barrier of $2$—and even challenge Comb's $1.6$ projective wall? In our model [1], whenever item $x$ is accessed, a possibly faulty oracle predicts the <strong>next two request indices</strong> $(x_1, x_2)$ at which $x$ will be requested again (with $\infty$ if fewer remain). Unlike advice-complexity schemes [11] or full-permutation predictors that output entire list states at each step [12], predicting two future arrival timestamps per accessed item mirrors the scalar next-arrival oracle used in ML-advised caching [10].
+        </p>
+
+        <h3>2.1 Why Exactly Two Hops? Pairwise Logic &amp; Tri-Coloring</h3>
+        <p>
+            Start with a $2$-item list $\{a, x\}$ where $x$ was just accessed at position $2$ in $(a, x)$. Because moving $x$ to $(x, a)$ is <strong>free</strong>, $1$-hop lookahead ($x_1 < a_1$) is already $1$-competitive: move $x$ to the front if and only if $x$ is requested again before $a$.
+        </p>
+        <p>
+            One-hop lookahead breaks at list length $\ell = 3$. In Reingold and Westbrook's $(1, 2, 3)$ example, deciding whether to pay $1$ unit upfront for a <em>paid swap</em> requires knowing whether an unaccessed item $a$ will be requested <strong>twice</strong> before $x$ (recovering the $1$-unit swap fee across two probes) or only once. Comparing the predicted next two arrivals $(a_1, a_2)$ of any item $a \neq x$ against $(x_1, x_2)$ yields $\binom{4}{2} = 6$ relative arrival patterns, which <strong>TwoHops</strong> partitions into three colors:
+        </p>
+        <ul>
+            <li><span class="pill green">Green Items</span> (ideally <em>before</em> $x$): $a$ occurs twice before $x$'s next arrival ($\langle a, a, x \rangle$, i.e., $a_1 < a_2 < x_1$).</li>
+            <li><span class="pill red">Red Items</span> (ideally <em>after</em> $x$): $x$ occurs twice before $a$'s next arrival ($\langle x, x, a \rangle$, i.e., $x_1 < x_2 < a_1$).</li>
+            <li><span class="pill gray">Gray Items</span> (indifferent / tie wrt paid swaps): interleaved arrivals such as $\langle a, x, x \rangle$, $\langle x, a, a \rangle$, $\langle a, x, a \rangle$, or $\langle x, a, x \rangle$, where neither item commands a strict two-hop lead that justifies paying for adjacent swaps.</li>
+        </ul>
+
+        <!-- ===== Figure 1: Interactive 6-Pattern Two-Hop Explorer ===== -->
+        <div class="figure" id="fig-twohops">
+            <div class="figure-title">Interactive Explorer: All $\binom{4}{2} = 6$ Two-Hop Arrival Orderings of $\{a, x\}$</div>
+            <div class="controls" role="group" aria-label="Choose two-hop arrival pattern">
+                <button class="btn active" data-pat="aaxx" type="button">⟨a, a, x, x⟩</button>
+                <button class="btn" data-pat="axax" type="button">⟨a, x, a, x⟩</button>
+                <button class="btn" data-pat="axxa" type="button">⟨a, x, x, a⟩</button>
+                <button class="btn" data-pat="xaax" type="button">⟨x, a, a, x⟩</button>
+                <button class="btn" data-pat="xaxa" type="button">⟨x, a, x, a⟩</button>
+                <button class="btn" data-pat="xxaa" type="button">⟨x, x, a, a⟩</button>
+            </div>
+            <div class="hop-tape" id="hop-tape"></div>
+            <div class="hop-grid">
+                <div class="hop-box" id="hop-ax">
+                    <h4>Start in $(a, x)$</h4>
+                    <div class="hop-score" id="score-ax">0</div>
+                    <div style="font-size:12px;color:#5f6368" id="trace-ax"></div>
+                </div>
+                <div class="hop-box" id="hop-xa">
+                    <h4>Start in $(x, a)$</h4>
+                    <div class="hop-score" id="score-xa">1</div>
+                    <div style="font-size:12px;color:#5f6368" id="trace-xa"></div>
+                </div>
+                <div class="hop-box">
+                    <h4>TwoHops Color of $a$</h4>
+                    <div style="margin:8px 0" id="hop-color-badge"></div>
+                    <div style="font-size:12px;color:#5f6368" id="hop-color-rule"></div>
+                </div>
+            </div>
+            <div class="hop-explain" id="hop-explain" aria-live="polite"></div>
+            <div class="figure-caption">Figure 1. Optimal $2$-item partial access cost over the first three projected arrivals after serving $x$.</div>
+        </div>
+
+        <h3>2.2 Brute-Force Configuration Objective &amp; Polynomial-Time Reduction</h3>
+        <p>
+            Conceptually, <strong>PDA</strong> evaluates every permutation $C \in S_\ell$ among all $\ell!$ list configurations and transitions from current list $L$ to the configuration $C^*$ minimizing the sum of two costs:
+        </p>
+        $$C^* = \arg\min_{C \in S_\ell} \Big( \text{Distance}(L \to C; x) + \text{Penalty}(C) \Big)$$
+        <ul>
+            <li><strong>Penalty Cost $\text{Penalty}(C)$:</strong> Counts pairwise violations of the ideal tri-color weak order $\text{Green} \prec x \prec \text{Red}$ in $C$—namely every <span class="pill red">Red</span> item placed ahead of $x$, every <span class="pill green">Green</span> item placed behind $x$, and every <span class="pill red">Red</span> item standing ahead of a <span class="pill green">Green</span> item.</li>
+            <li><strong>Distance Cost $\text{Distance}(L \to C; x)$:</strong> The minimum <em>reorganization cost</em>—i.e., the minimum number of unit-cost <strong>paid exchanges</strong> required when combined with at most one zero-cost <strong>free exchange</strong> of $x$. Writing $L_{-x}$ and $C_{-x}$ for the orderings of the $\ell - 1$ non-$x$ items, this exact minimum equals:
+            $$\text{Distance}(L \to C; x) = \text{inv}(L_{-x}, C_{-x}) + \big|\{ y \neq x : \text{pos}_L(y) > \text{pos}_L(x) \text{ and } \text{pos}_C(y) < \text{pos}_C(x) \}\big|$$
+            because items starting ahead of $x$ in $L$ that belong behind $x$ in $C$ are jumped over by $x$ for <em>free</em>, whereas non-$x$ inversions and items moving from behind $x$ to ahead of $x$ each require $1$ paid swap.</li>
+        </ul>
+        <p>
+            <strong>Why PDA does not need $\Theta(\ell!)$ runtime in practice:</strong> Although the brute-force definition scans all $\ell!$ permutations (which our simulator below computes explicitly so you can inspect every state!), any optimal $C^*$ preserves the relative order of items <em>within</em> <span class="pill green">Green</span>, <em>within</em> <span class="pill gray">Gray</span>, and <em>within</em> <span class="pill red">Red</span>—swapping two same-color items increases $\text{inv}(L_{-x}, C_{-x})$ by at least $1$ with zero reduction in $\text{Penalty}(C)$. Thus finding $C^*$ reduces to bubbling <span class="pill green">Green</span> items past blocking <span class="pill red">Red</span> items and choosing $x$'s free-jump landing slot in polynomial time.
+        </p>
+
+        <h3>2.3 Four Canonical Cases of PDA in Action</h3>
+        <p>
+            Suppose $x$ is accessed at the tail of $L = (a_1, \dots, a_m, x)$. Click through the four color patterns below to see when free exchanges suffice and when PDA triggers a paid swap:
+        </p>
+
+        <!-- ===== Figure 2: Canonical Coloring Moves ===== -->
+        <div class="figure" id="fig-canon">
+            <div class="controls" role="group" aria-label="Canonical PDA examples">
+                <button class="btn active" data-case="allred" type="button">1. All Red</button>
+                <button class="btn" data-case="allgreen" type="button">2. All Green</button>
+                <button class="btn" data-case="split" type="button">3. Green → Red Split</button>
+                <button class="btn" data-case="inverted" type="button">4. Red Blocking Green (Paid Swap!)</button>
+            </div>
+            <div class="canon-stage">
+                <div class="canon-col">
+                    <h4>Before Reorganization ($L$)</h4>
+                    <div class="canon-row" id="canon-before"></div>
+                </div>
+                <div class="canon-mid" id="canon-op">&rarr;<small>0 paid</small></div>
+                <div class="canon-col">
+                    <h4>PDA Target ($C^*$)</h4>
+                    <div class="canon-row" id="canon-after"></div>
+                </div>
+            </div>
+            <div class="hop-explain" id="canon-desc" aria-live="polite"></div>
+            <div class="figure-caption">Figure 2. How PDA separates <span class="pill green">Green</span> and <span class="pill red">Red</span> items around accessed item $x$.</div>
+        </div>
+
+        <h3>2.4 TwoHopsNoPaid, Conjecture 1 &amp; Robust Switching</h3>
+        <p>
+            Restricting PDA to $\text{Distance}(L \to C; x) = 0$ yields <strong>TwoHopsNoPaid</strong>, which forbids paid exchanges entirely and simply free-moves $x$ to the prefix slot minimizing <span class="pill red">Red</span>-before-$x$ plus <span class="pill green">Green</span>-after-$x$ violations (using $1$-hop tie-breaking among zero-penalty slots). In [1, 2], we show that <strong>TwoHopsNoPaid strictly outperforms MTF and breaks the deterministic lower bound of $2$</strong> when predictions are accurate.
+        </p>
+
+        <div class="callout thm">
+            <strong>Conjecture 1 (Consistency of Full PDA [1, 2])</strong>
+            When oracle predictions are accurate ($\eta = 0$), potential-function analysis over pairwise color inversions bounds the competitive ratio of full <strong>PDA (TwoHops)</strong> at $\le 1.6$. Because PDA runs deterministically given the input sequence, achieving $\le 1.6$ matches Comb's optimal projective randomized bound [7, 9]—the best known polynomial-time offline approximation factor ($1.6$) for NP-hard List Update [5]—and any strict bound $&lt; 1.6$ improves upon it.
+        </div>
+
+        <p>
+            <strong>Smoothness &amp; Robustness:</strong> Because tri-coloring depends only on the <em>ordinal ranking</em> of $\{a_1, a_2, x_1, x_2\}$, prediction noise $\eta$ that perturbs timestamps without flipping relative arrival order incurs <strong>zero extra cost</strong>. To guard against arbitrarily corrupted advice ($\eta \to \infty$), note that List Update is a <strong>Metrical Task System (MTS)</strong> on $\ell!$ states whose diameter is at most $\binom{\ell}{2}$ paid swaps. Running online switching / Multiplicative Weights [13] between PDA and $2$-competitive MTF yields a Pareto-efficient hybrid: $(1 + \delta)$-close to PDA when the oracle is trustworthy, and capped at $O(1/\delta)$ times MTF ($\le 2$-competitive) when the oracle lies.
+        </p>
+
+        <h2>3. List Update vs. Caching (LRU): The NP-Hardness Chasm</h2>
+        <p>
+            List Update and Paging (Caching) were born in the same 1985 paper [3], and MTF and <strong>Least Recently Used (LRU)</strong> share the exact same recency instinct. Under ML predictions, however, their theoretical ceilings diverge sharply:
+        </p>
+        <table class="compare">
+            <thead>
+                <tr>
+                    <th>Dimension</th>
+                    <th>Paging / Caching (Cache Size $k$)</th>
+                    <th>Online List Update (List Length $\ell$)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Classic Deterministic Baseline</td>
+                    <td><strong>LRU</strong>: $k$-competitive (tight deterministic bound) [3].</td>
+                    <td><strong>MTF</strong>: $2$-competitive (tight deterministic bound) [3].</td>
+                </tr>
+                <tr>
+                    <td>Randomized Online Barrier</td>
+                    <td>$O(\log k)$-competitive (Fiat et al. Marker).</td>
+                    <td>$1.5$ lower bound [8]; $1.6$ projective optimum (Comb) [7, 9].</td>
+                </tr>
+                <tr>
+                    <td>Offline Complexity</td>
+                    <td><strong>In $\text{P}$</strong>: Belady's Furthest-in-Future rule [14] is exact $\text{OPT}$ in $O(m \log k)$.</td>
+                    <td><strong>NP-hard</strong> (Ambühl [5]); exact DP takes $\Theta(2^\ell (\ell - 1)! m)$ [4].</td>
+                </tr>
+                <tr>
+                    <td>Power of Perfect Predictions</td>
+                    <td>$1$-hop next-arrival lookahead achieves <strong>$1$-competitiveness</strong> (exact $\text{OPT}$) [10].</td>
+                    <td>$1$-hop is optimal only for $\ell = 2$; $\ell \ge 3$ needs $2$ hops for paid swaps, and poly-time $1$-competitiveness is impossible unless $\text{P} = \text{NP}$.</td>
+                </tr>
+            </tbody>
+        </table>
 
         <hr>
 
-        <h3>Image Generation: PDA vs. MTF Decision Matrix</h3>
-        <p>The following simulator illustrates how the PDA algorithm uses lookahead predictions to make a different decision than the reactionary Move-To-Front algorithm, specifically for a list of two elements \(\{A, B\}\).</p>
-    </div>
+        <h2>4. Interactive Arena: Static vs. MTF vs. TwoHopsNoPaid vs. PDA vs. Brute-Force OPT</h2>
+        <p>
+            Test all five online strategies side by side against <strong>Reingold–Westbrook's exact brute-force offline DP ($\text{OPT}$)</strong>. Expand the <em>Brute-Force Configuration Inspector</em> below the cards to watch PDA score every permutation $C \in S_\ell$ on each step, or click <strong>⚡ Corrupt Oracle</strong> to invert the predictions and watch <strong>Robust (PDA + MTF)</strong> protect against a lying model.
+        </p>
 
-    <h1 class="sim-title">Interactive Simulator: Static vs MTF vs PDA</h1>
-    
-    <div class="sequence-container">
-        <h3>Request Sequence</h3>
-        <div class="sequence" id="sequence-ui"></div>
-    </div>
+        <!-- ===== Figure 3: Full Multi-Algorithm & Brute-Force Simulator ===== -->
+        <div class="figure" id="fig-sim">
+            <div class="controls" role="group" aria-label="Simulation presets">
+                <button class="btn active" data-preset="trap2" type="button">Preset 1: 2-Item MTF Trap</button>
+                <button class="btn" data-preset="paid3" type="button">Preset 2: 3-Item Paid Swap Wins</button>
+                <button class="btn" data-preset="rw4" type="button">Preset 3: Reingold–Westbrook ⟨3,2,2,3⟩</button>
+                <button class="btn" data-preset="mix3" type="button">Preset 4: Full Separation Staircase</button>
+            </div>
 
-    <div class="controls">
-        <button id="next-btn" onclick="nextStep()">Process Next Request</button>
-        <button class="reset" onclick="resetSim()">Reset</button>
-    </div>
+            <div class="custom-bar">
+                <label>List ($\le 4$ items): <input type="text" id="inp-list" value="A,B" size="8"></label>
+                <label>Requests: <input type="text" id="inp-seq" value="B,A,B,B,B,A,B,B,B" size="24"></label>
+                <button class="btn" id="btn-apply" type="button">Load Custom</button>
+            </div>
 
-    <div class="panels">
-        <div class="panel">
-            <h2>Static</h2>
-            <div class="cost">Total Cost: <span id="cost-static">0</span></div>
-            <div class="list-state" id="list-static"></div>
+            <div class="sim-Subbar">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                    <button class="btn action" id="next-btn" type="button">Step &rarr;</button>
+                    <button class="btn" id="auto-btn" type="button">Auto-Play</button>
+                    <button class="btn" id="reset-btn" type="button">&#8634; Reset</button>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                    <button class="btn" id="model-btn" type="button" title="Switch between Full (i) and Partial (i-1) access cost">Cost: Full (i)</button>
+                    <button class="btn danger" id="corrupt-btn" type="button" aria-pressed="false">&#9889; Corrupt Oracle: OFF</button>
+                </div>
+            </div>
+
+            <div class="seq-box">
+                <div class="seq-label">Request Sequence $\sigma$ (<span id="step-counter">0 / 9</span>)</div>
+                <div class="sequence" id="sequence-ui"></div>
+            </div>
+
+            <div class="opt-banner" id="opt-banner">
+                <span><strong>Exact Offline Brute-Force $\text{OPT}(\sigma)$:</strong> <code id="opt-total">12</code> (full sequence DP over $S_\ell$)</span>
+                <span id="opt-hint" style="font-size:12.5px;opacity:0.9">Colors on PDA cards show oracle view at last processed step.</span>
+            </div>
+
+            <div class="panels">
+                <div class="panel">
+                    <h4>Static</h4>
+                    <div class="panel-sub">Never reorders list</div>
+                    <div class="cost" id="cost-static">0</div>
+                    <div class="cost-breakdown" id="bd-static">acc 0 + paid 0</div>
+                    <div class="list-state" id="list-static"></div>
+                </div>
+
+                <div class="panel">
+                    <h4>MTF</h4>
+                    <div class="panel-sub">$2$-comp. reactive</div>
+                    <div class="cost" id="cost-mtf">0</div>
+                    <div class="cost-breakdown" id="bd-mtf">acc 0 + paid 0</div>
+                    <div class="list-state" id="list-mtf"></div>
+                </div>
+
+                <div class="panel">
+                    <h4>TwoHopsNoPaid</h4>
+                    <div class="panel-sub">Free moves only</div>
+                    <div class="cost" id="cost-nopaid">0</div>
+                    <div class="cost-breakdown" id="bd-nopaid">acc 0 + paid 0</div>
+                    <div class="list-state" id="list-nopaid"></div>
+                </div>
+
+                <div class="panel pda-main">
+                    <h4>Full PDA</h4>
+                    <div class="panel-sub">Brute-force $\min(D+P)$</div>
+                    <div class="cost" id="cost-pda">0</div>
+                    <div class="cost-breakdown" id="bd-pda">acc 0 + paid 0</div>
+                    <div class="list-state" id="list-pda"></div>
+                </div>
+
+                <div class="panel">
+                    <h4>Robust Hybrid</h4>
+                    <div class="panel-sub">PDA + MTF guard</div>
+                    <div class="cost" id="cost-robust">0</div>
+                    <div class="cost-breakdown" id="bd-robust">acc 0 + paid 0</div>
+                    <div class="list-state" id="list-robust"></div>
+                </div>
+            </div>
+
+            <div class="step-log" id="sim-log" aria-live="polite">
+                Press <strong>Step &rarr;</strong> (or pick <strong>Preset 2</strong>) to inspect TwoHops coloring, paid swaps, and brute-force $S_\ell$ scoring.
+            </div>
+
+            <details class="bf-details" open>
+                <summary>Brute-Force $S_\ell$ Configuration Inspector (PDA's $\ell!$ State Evaluation on Current Step)</summary>
+                <div id="bf-container" style="font-size:13px;color:#5f6368;margin-top:8px">
+                    Advance one step to inspect $\text{Distance}(L \to C; x) + \text{Penalty}(C)$ across all $\ell!$ permutations.
+                </div>
+            </details>
+
+            <div class="figure-caption">
+                Figure 3. Legend on PDA cards: <span class="pill blue">Requested $x$</span>
+                <span class="pill green">Green ($\prec x$)</span>
+                <span class="pill gray">Gray (tie)</span>
+                <span class="pill red">Red ($x \prec$)</span>.
+            </div>
         </div>
 
-        <div class="panel">
-            <h2>MTF</h2>
-            <div class="cost">Total Cost: <span id="cost-mtf">0</span></div>
-            <div class="list-state" id="list-mtf"></div>
-        </div>
+        <h2>References</h2>
+        <ol class="ref-list">
+            <li><strong>A. Bhattacharya, S. Kamali, and H. Xu</strong>, "Online List Update with Predictions," <em>ACM SIGMETRICS Workshop on Learning-augmented Algorithms: Theory and Applications (LATA)</em>, 2023. <a href="https://learning-augmented-algorithms.github.io/2023/papers/sigmetrics23-lata-posters-paper4.pdf" target="_blank" rel="noopener">[PDF]</a></li>
+            <li><strong>A. Bhattacharya</strong>, <em>Going Beyond Worst-Case: A Study on Cache Adaptivity and Machine Learning Advice</em>, Ph.D. Dissertation, Stony Brook University, 2024. <a href="https://www.proquest.com/openview/93cc0e2688f6662bb4d39634331a781d/1?pq-origsite=gscholar&amp;cbl=18750&amp;diss=y" target="_blank" rel="noopener">[ProQuest]</a></li>
+            <li><strong>D. D. Sleator and R. E. Tarjan</strong>, "Amortized efficiency of list update and paging rules," <em>Communications of the ACM</em>, 28(2):202–208, 1985. <a href="https://doi.org/10.1145/2786.2793" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>N. Reingold and J. R. Westbrook</strong>, "Off-line algorithms for the list update problem," <em>Information Processing Letters</em>, 60(2):75–80, 1996. <a href="https://doi.org/10.1016/S0020-0190(96)00144-5" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>C. Ambühl</strong>, "Offline list update is NP-hard," in <em>Proc. 8th Annual European Symposium on Algorithms (ESA)</em>, LNCS 1879, pp. 42–51, 2000. <a href="https://doi.org/10.1007/3-540-45253-2_5" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>N. Reingold, J. Westbrook, and D. D. Sleator</strong>, "Randomized competitive algorithms for the list update problem," <em>Algorithmica</em>, 11(1):15–32, 1994. <a href="https://doi.org/10.1007/BF01294261" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>S. Albers, B. von Stengel, and R. Werchner</strong>, "A combined BIT and TIMESTAMP algorithm for the list update problem," <em>Information Processing Letters</em>, 56(3):135–139, 1995. <a href="https://doi.org/10.1016/0020-0190(95)00136-Z" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>B. Teia</strong>, "A lower bound for randomized list update algorithms," <em>Information Processing Letters</em>, 47(1):5–9, 1993. <a href="https://doi.org/10.1016/0020-0190(93)90150-8" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>C. Ambühl, B. Gärtner, and B. von Stengel</strong>, "Optimal lower bounds for projective list update algorithms," <em>SIAM Journal on Computing</em>, 39(6):2544–2566, 2010. <a href="https://doi.org/10.1137/070709798" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>T. Lykouris and S. Vassilvitskii</strong>, "Competitive caching with machine learned advice," in <em>Proc. ICML</em>, 2018 (<em>Journal of the ACM</em>, 68(4):1–25, 2021). <a href="https://doi.org/10.1145/3447579" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>J. Boyar, S. Kamali, K. S. Larsen, and A. López-Ortiz</strong>, "On the list update problem with advice," <em>Information and Computation</em>, 253:411–423, 2017. <a href="https://doi.org/10.1016/j.ic.2016.06.008" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>Y. Azar, S. Lewkowicz, and V. Suriyanarayana</strong>, "List update with prediction," in <em>Proc. AAAI Conference on Artificial Intelligence (AAAI)</em>, 2025.</li>
+            <li><strong>A. Blum and C. Burch</strong>, "On-line learning and the metrical task system problem," <em>Machine Learning</em>, 39(1):35–58, 2000. <a href="https://doi.org/10.1023/A:1007621832648" target="_blank" rel="noopener">[DOI]</a></li>
+            <li><strong>L. A. Belady</strong>, "A study of replacement algorithms for a virtual-storage computer," <em>IBM Systems Journal</em>, 5(2):78–101, 1966. <a href="https://doi.org/10.1147/sj.52.0078" target="_blank" rel="noopener">[DOI]</a></li>
+        </ol>
 
-        <div class="panel">
-            <h2>PDA</h2>
-            <div class="cost">Total Cost: <span id="cost-pda">0</span></div>
-            <div class="list-state" id="list-pda"></div>
-        </div>
-    </div>
+        <footer class="post-footer">
+            <a href="../../an_artichoke_of_algorithm.html" class="back-button">&larr; Back to An Artichoke of Algorithm</a>
+        </footer>
+    </article>
+</main>
 
-    <script>
-        const sequence = ['B', 'A', 'B', 'B', 'B', 'A', 'B', 'B', 'B'];
-        const initialList = ['A', 'B'];
+<script>
+(function () {
+    "use strict";
 
-        let step = 0;
-        let state = {
-            static: { list: [...initialList], cost: 0 },
-            mtf: { list: [...initialList], cost: 0 },
-            pda: { list: [...initialList], cost: 0 }
-        };
+    /* ---------- Dynamic read time (300 wpm) ---------- */
+    var words = document.querySelector(".blog-post").innerText.split(/\s+/).length;
+    document.getElementById("read-time").textContent = Math.max(1, Math.round(words / 300));
 
-        function renderSequence() {
-            const container = document.getElementById('sequence-ui');
-            container.innerHTML = '';
-            sequence.forEach((item, index) => {
-                const el = document.createElement('div');
-                el.className = `seq-item ${index === step ? 'active' : index < step ? 'past' : ''}`;
-                el.innerText = item;
-                container.appendChild(el);
-            });
-            document.getElementById('next-btn').disabled = step >= sequence.length;
+    /* =====================================================================
+       FIGURE 1: 6-Pattern Two-Hop Explorer
+       ===================================================================== */
+    var PATTERNS = {
+        aaxx: {
+            seq: ["a", "a", "x", "x"],
+            ax: { score: 0, trace: "a(0) + a(0) + x(1, move x→front) = 1 over 3 reqs; 0 on first two a's" },
+            xa: { score: 1, trace: "a(1, move a→front) + a(0) + x(1) = 2 over 3 reqs (+1 worse)" },
+            win: "ax",
+            pill: '<span class="pill green">Green (a &prec; x)</span>',
+            rule: "a₁ < a₂ < x₁ (a arrives twice before x)",
+            explain: "<strong>Strict Green:</strong> Because <code>a</code> is requested twice before <code>x</code> appears even once, placing <code>a</code> ahead of <code>x</code> saves a guaranteed probe—strong enough to justify a paid exchange if a Red item blocks <code>a</code>."
+        },
+        axax: {
+            seq: ["a", "x", "a", "x"],
+            ax: { score: 1, trace: " over ⟨a,x,a⟩: a(0) + x(1, keep (a,x)) + a(0) = 1" },
+            xa: { score: 2, trace: " over ⟨a,x,a⟩: a(1) + x(0) + a(1) = 2" },
+            win: "ax",
+            pill: '<span class="pill gray">Gray (1-hop leans a &prec; x)</span>',
+            rule: "a₁ < x₁ < a₂ < x₂ (alternating)",
+            explain: "<strong>Alternating (Gray for paid swaps, free tie-break favors (a, x)):</strong> On a 2-item list, keeping <code>(a, x)</code> saves 1 probe over <code>⟨a, x, a⟩</code>. TwoHops marks alternating pairs Gray so PDA will not overspend unit-cost paid swaps chasing single-request oscillations, while free moves still respect 1-hop order <code>a₁ &lt; x₁</code>."
+        },
+        axxa: {
+            seq: ["a", "x", "x", "a"],
+            ax: { score: 1, trace: " over ⟨a,x,x⟩: a(0) + x(1, free-move→(x,a)) + x(0) = 1" },
+            xa: { score: 1, trace: " over ⟨a,x,x⟩: a(1, keep (x,a)) + x(0) + x(0) = 1" },
+            win: "tie",
+            pill: '<span class="pill gray">Gray (Exact Cost Tie)</span>',
+            rule: "a₁ < x₁ < x₂ < a₂",
+            explain: "<strong>Exact Tie (Gray):</strong> Over <code>⟨a, x, x⟩</code>, both starting states <code>(a, x)</code> and <code>(x, a)</code> pay partial cost <code>1</code> and finish in state <code>(x, a)</code>! Spending a paid exchange to reorder them would strictly waste cost."
+        },
+        xaax: {
+            seq: ["x", "a", "a", "x"],
+            ax: { score: 1, trace: " over ⟨x,a,a⟩: x(1, keep (a,x)) + a(0) + a(0) = 1" },
+            xa: { score: 1, trace: " over ⟨x,a,a⟩: x(0) + a(1, free-move→(a,x)) + a(0) = 1" },
+            win: "tie",
+            pill: '<span class="pill gray">Gray (Exact Cost Tie)</span>',
+            rule: "x₁ < a₁ < a₂ < x₂",
+            explain: "<strong>Exact Tie (Gray):</strong> Symmetric to <code>⟨a, x, x⟩</code>—both <code>(a, x)</code> and <code>(x, a)</code> incur partial cost <code>1</code> over <code>⟨x, a, a⟩</code> and end in <code>(a, x)</code>. Relative order before serving does not matter."
+        },
+        xaxa: {
+            seq: ["x", "a", "x", "a"],
+            ax: { score: 2, trace: " over ⟨x,a,x⟩: x(1, move→(x,a)) + a(1, stay) + x(0) = 2" },
+            xa: { score: 1, trace: " over ⟨x,a,x⟩: x(0) + a(1, keep (x,a)) + x(0) = 1" },
+            win: "xa",
+            pill: '<span class="pill gray">Gray (1-hop leans x &prec; a)</span>',
+            rule: "x₁ < a₁ < x₂ < a₂ (alternating)",
+            explain: "<strong>Alternating (Gray for paid swaps, free tie-break favors (x, a)):</strong> If moving <code>x</code> ahead of <code>a</code> is free, 1-hop tie-breaking (<code>x₁ &lt; a₁</code>) jumps <code>x</code> ahead of <code>a</code> for <code>0</code> cost; if a paid swap would be required, marking <code>a</code> Gray avoids overpaying."
+        },
+        xxaa: {
+            seq: ["x", "x", "a", "a"],
+            ax: { score: 1, trace: "x(1, move x→front) + x(0) = 1 on first two x's" },
+            xa: { score: 0, trace: "x(0) + x(0) = 0 on first two x's" },
+            win: "xa",
+            pill: '<span class="pill red">Red (x &prec; a)</span>',
+            rule: "x₁ < x₂ < a₁ (x arrives twice before a)",
+            explain: "<strong>Strict Red:</strong> <code>x</code> will be requested twice before <code>a</code>'s next request, so <code>a</code> belongs strictly behind <code>x</code>. Since <code>x</code> was just accessed, jumping <code>x</code> ahead of <code>a</code> is completely free!"
         }
+    };
 
-        function renderList(type, highlightItem = null) {
-            const container = document.getElementById(`list-${type}`);
-            document.getElementById(`cost-${type}`).innerText = state[type].cost;
-            container.innerHTML = '';
-            
-            state[type].list.forEach((item, index) => {
-                const el = document.createElement('div');
-                el.className = `list-item ${item === highlightItem ? 'highlight' : ''}`;
-                el.innerHTML = `<span>Pos ${index + 1}</span> <span>${item}</span>`;
-                container.appendChild(el);
+    function renderHopPattern(key) {
+        var p = PATTERNS[key];
+        var tape = document.getElementById("hop-tape");
+        tape.innerHTML = '<span class="hop-token now">Now: req x</span><span class="hop-arrow">&rarr;</span>';
+        var seenA = 0, seenX = 0;
+        p.seq.forEach(function (sym, idx) {
+            var sub = sym === "a" ? (++seenA) : (++seenX);
+            var tok = document.createElement("span");
+            tok.className = "hop-token " + (sym === "a" ? "tok-a" : "tok-x");
+            tok.innerHTML = sym + "<sub>" + sub + "</sub>";
+            tape.appendChild(tok);
+            if (idx < p.seq.length - 1) {
+                var arr = document.createElement("span");
+                arr.className = "hop-arrow";
+                arr.innerHTML = "&rarr;";
+                tape.appendChild(arr);
+            }
+        });
+        document.getElementById("score-ax").textContent = "Cost " + p.ax.score;
+        document.getElementById("trace-ax").textContent = p.ax.trace;
+        document.getElementById("score-xa").textContent = "Cost " + p.xa.score;
+        document.getElementById("trace-xa").textContent = p.xa.trace;
+        document.getElementById("hop-ax").classList.toggle("win", p.win === "ax" || p.win === "tie");
+        document.getElementById("hop-xa").classList.toggle("win", p.win === "xa" || p.win === "tie");
+        document.getElementById("hop-color-badge").innerHTML = p.pill;
+        document.getElementById("hop-color-rule").textContent = p.rule;
+        document.getElementById("hop-explain").innerHTML = p.explain;
+        document.querySelectorAll("#fig-twohops [data-pat]").forEach(function (b) {
+            b.classList.toggle("active", b.dataset.pat === key);
+        });
+    }
+    document.querySelectorAll("#fig-twohops [data-pat]").forEach(function (b) {
+        b.addEventListener("click", function () { renderHopPattern(b.dataset.pat); });
+    });
+    renderHopPattern("aaxx");
+
+    /* =====================================================================
+       FIGURE 2: 4 Canonical PDA Coloring Cases
+       ===================================================================== */
+    var CANON = {
+        allred: {
+            before: [["r₁", "red"], ["r₂", "red"], ["r₃", "red"], ["x", "req"]],
+            after:  [["x", "req"], ["r₁", "red"], ["r₂", "red"], ["r₃", "red"]],
+            op: "&rarr;<small>0 paid + 1 free</small>",
+            desc: "<strong>All Red (behaves like MTF):</strong> Every preceding item has <code>x₁ &lt; x₂ &lt; rᵢ</code>. Free-jumping <code>x</code> to index 1 gives <code>Distance = 0</code> and eliminates all 3 Red-before-<code>x</code> penalties (<code>Total = 0 + 0 = 0</code> vs. <code>3</code> if left at the tail)."
+        },
+        allgreen: {
+            before: [["g₁", "green"], ["g₂", "green"], ["g₃", "green"], ["x", "req"]],
+            after:  [["g₁", "green"], ["g₂", "green"], ["g₃", "green"], ["x", "req"]],
+            op: "&rarr;<small>0 paid, 0 moves</small>",
+            desc: "<strong>All Green (opposite of MTF!):</strong> Every preceding item will be accessed twice before <code>x</code> returns. MTF would blindly shove <code>x</code> to the front and force <code>g₁, g₂, g₃</code> to step over it; PDA leaves <code>x</code> at the tail (<code>Distance = 0, Penalty = 0</code>)."
+        },
+        split: {
+            before: [["g₁", "green"], ["g₂", "green"], ["r₁", "red"], ["r₂", "red"], ["x", "req"]],
+            after:  [["g₁", "green"], ["g₂", "green"], ["x", "req"], ["r₁", "red"], ["r₂", "red"]],
+            op: "&rarr;<small>0 paid + 1 free</small>",
+            desc: "<strong>Clean Green &rarr; Red Split:</strong> Green items already precede Red items, so zero paid swaps are needed. PDA free-jumps <code>x</code> to the exact boundary between Green and Red (<code>Distance = 0, Penalty = 0</code>)."
+        },
+        inverted: {
+            before: [["r₁", "red"], ["g₁", "green"], ["x", "req"]],
+            after:  [["g₁", "green"], ["x", "req"], ["r₁", "red"]],
+            op: "&rarr;<small>1 paid + 1 free</small>",
+            desc: "<strong>Red Blocking Green (Reingold–Westbrook core):</strong> Because Red <code>r₁</code> sits ahead of Green <code>g₁</code>, <em>every</em> free-only move of <code>x</code> leaves at least 2 violations (<code>[r₁, g₁, x]</code> or <code>[x, r₁, g₁]</code>). PDA pays <code>1</code> unit to bubble <code>g₁</code> past <code>r₁</code> and free-jumps <code>x</code> over <code>r₁</code>, achieving the unique minimum <code>Distance (1) + Penalty (0) = 1</code>!"
+        }
+    };
+
+    function renderCanon(key) {
+        var c = CANON[key];
+        function fillRow(id, arr) {
+            var el = document.getElementById(id);
+            el.innerHTML = "";
+            arr.forEach(function (pair) {
+                var d = document.createElement("div");
+                d.className = "c-chip " + pair[1];
+                d.textContent = pair[0];
+                el.appendChild(d);
             });
         }
+        fillRow("canon-before", c.before);
+        fillRow("canon-after", c.after);
+        document.getElementById("canon-op").innerHTML = c.op;
+        document.getElementById("canon-desc").innerHTML = c.desc;
+        document.querySelectorAll("#fig-canon [data-case]").forEach(function (b) {
+            b.classList.toggle("active", b.dataset.case === key);
+        });
+    }
+    document.querySelectorAll("#fig-canon [data-case]").forEach(function (b) {
+        b.addEventListener("click", function () { renderCanon(b.dataset.case); });
+    });
+    renderCanon("allred");
 
-        function updateAllLists(highlightItem = null) {
-            renderList('static', highlightItem);
-            renderList('mtf', highlightItem);
-            renderList('pda', highlightItem);
-            
-            if (highlightItem) {
-                setTimeout(() => updateAllLists(null), 500);
+    /* =====================================================================
+       FIGURE 3: Multi-Algorithm & Brute-Force Simulator
+       ===================================================================== */
+    var PRESETS = {
+        trap2: { list: ["A", "B"], seq: ["B", "A", "B", "B", "B", "A", "B", "B", "B"] },
+        paid3: { list: ["1", "2", "3"], seq: ["3", "2", "2", "3", "3"] },
+        rw4:   { list: ["1", "2", "3"], seq: ["3", "2", "2", "3"] },
+        mix3:  { list: ["A", "B", "C"], seq: ["C", "B", "B", "C", "C", "A", "C", "C", "C", "A", "C", "C"] }
+    };
+
+    var initialList = PRESETS.trap2.list.slice();
+    var sequence = PRESETS.trap2.seq.slice();
+    var fullCostModel = true;
+    var corruptOracle = false;
+    var step = 0;
+    var autoTimer = null;
+    var state = {};
+    var lastColors = {};
+
+    function permutations(arr) {
+        if (arr.length <= 1) return [arr.slice()];
+        var out = [];
+        for (var i = 0; i < arr.length; i++) {
+            var head = arr[i];
+            var rest = arr.slice(0, i).concat(arr.slice(i + 1));
+            var sub = permutations(rest);
+            for (var j = 0; j < sub.length; j++) {
+                out.push([head].concat(sub[j]));
+            }
+        }
+        return out;
+    }
+
+    function kendallTau(a, b) {
+        var posB = {};
+        for (var i = 0; i < b.length; i++) posB[b[i]] = i;
+        var inv = 0;
+        for (var p = 0; p < a.length; p++) {
+            for (var q = p + 1; q < a.length; q++) {
+                if (posB[a[p]] > posB[a[q]]) inv++;
+            }
+        }
+        return inv;
+    }
+
+    /* PaidDistance(L -> C; x): exact minimum paid swaps when x can make 1 free forward jump */
+    function paidDistanceWithFreeX(L, C, x) {
+        var Lnx = L.filter(function (v) { return v !== x; });
+        var Cnx = C.filter(function (v) { return v !== x; });
+        var inv = kendallTau(Lnx, Cnx);
+        var posLx = L.indexOf(x);
+        var posCx = C.indexOf(x);
+        var crossX = 0;
+        for (var i = 0; i < posCx; i++) {
+            var y = C[i];
+            if (L.indexOf(y) > posLx) crossX++;
+        }
+        return inv + crossX;
+    }
+
+    /* Next two occurrences (0-based offsets in remaining sequence, Infinity if absent) */
+    function nextTwo(rem, item) {
+        var first = Infinity, second = Infinity;
+        for (var i = 0; i < rem.length; i++) {
+            if (rem[i] === item) {
+                if (first === Infinity) first = i;
+                else { second = i; break; }
+            }
+        }
+        if (corruptOracle) {
+            /* Adversarial oracle inversion: imminent items look infinitely far, absent/far items look imminent */
+            var maxLen = rem.length + 5;
+            var f1 = first === Infinity ? 0 : (maxLen - first);
+            var f2 = second === Infinity ? 1 : (maxLen - second + 0.5);
+            return f1 <= f2 ? [f1, f2] : [f2, f1];
+        }
+        return [first, second];
+    }
+
+    function classifyColors(list, x, rem) {
+        var xHops = nextTwo(rem, x);
+        var colors = {};
+        list.forEach(function (item) {
+            if (item === x) {
+                colors[item] = "req";
+                return;
+            }
+            var aHops = nextTwo(rem, item);
+            if (aHops[1] < xHops[0]) {
+                colors[item] = "green";
+            } else if (xHops[1] < aHops[0]) {
+                colors[item] = "red";
+            } else {
+                colors[item] = "gray";
+            }
+        });
+        return { colors: colors, xHops: xHops };
+    }
+
+    /* Penalty(C): violations of ideal strict order Green < x < Red */
+    function penaltyCost(C, x, colors) {
+        var pen = 0;
+        var posX = C.indexOf(x);
+        for (var i = 0; i < C.length; i++) {
+            var u = C[i];
+            if (u === x) continue;
+            if (colors[u] === "red" && i < posX) pen++;
+            if (colors[u] === "green" && i > posX) pen++;
+            for (var j = i + 1; j < C.length; j++) {
+                var v = C[j];
+                if (colors[u] === "red" && colors[v] === "green") pen++;
+            }
+        }
+        return pen;
+    }
+
+    /* 1-hop secondary tie-breaker for free-move placement of x against Gray items */
+    function oneHopMismatch(C, x, rem) {
+        var x1 = nextTwo(rem, x)[0];
+        var posX = C.indexOf(x);
+        var mis = 0;
+        for (var i = 0; i < C.length; i++) {
+            if (i === posX) continue;
+            var a1 = nextTwo(rem, C[i])[0];
+            if (i < posX && x1 < a1) mis++;
+            if (i > posX && a1 < x1) mis++;
+        }
+        return mis;
+    }
+
+    /* Exact Offline Brute-Force DP (Reingold-Westbrook model over all l! permutations) */
+    function computeExactOfflineOPT(initL, seq, useFull) {
+        var perms = permutations(initL);
+        var S = perms.length;
+        var keyOf = {};
+        for (var i = 0; i < S; i++) keyOf[perms[i].join("\x00")] = i;
+
+        var distMat = [];
+        for (var a = 0; a < S; a++) {
+            distMat[a] = [];
+            for (var b = 0; b < S; b++) {
+                distMat[a][b] = kendallTau(perms[a], perms[b]);
             }
         }
 
-        function nextStep() {
-            if (step >= sequence.length) return;
-            const req = sequence[step];
-
-            // 1. Static Update
-            const staticIdx = state.static.list.indexOf(req);
-            state.static.cost += (staticIdx + 1);
-
-            // 2. MTF Update
-            const mtfIdx = state.mtf.list.indexOf(req);
-            state.mtf.cost += (mtfIdx + 1);
-            state.mtf.list.splice(mtfIdx, 1);
-            state.mtf.list.unshift(req);
-
-            // 3. PDA Update
-            const pdaIdx = state.pda.list.indexOf(req);
-            state.pda.cost += (pdaIdx + 1);
-            
-            // PDA Lookahead Logic (Only moves if requested item is in position 2)
-            if (pdaIdx === 1) {
-                const otherItem = state.pda.list[0];
-                const remainingSequence = sequence.slice(step + 1);
-                
-                const nextReqIdx = remainingSequence.indexOf(req);
-                const nextOtherIdx = remainingSequence.indexOf(otherItem);
-                
-                const valReq = nextReqIdx === -1 ? Infinity : nextReqIdx;
-                const valOther = nextOtherIdx === -1 ? Infinity : nextOtherIdx;
-
-                // Move to front if the requested item appears BEFORE the other item in the future
-                if (valReq < valOther) {
-                    state.pda.list.splice(1, 1);
-                    state.pda.list.unshift(req);
+        var dp = new Array(S).fill(0);
+        for (var t = seq.length - 1; t >= 0; t--) {
+            var req = seq[t];
+            var afterProbe = new Array(S).fill(Infinity);
+            for (var s = 0; s < S; s++) {
+                var p = perms[s];
+                var idx = p.indexOf(req);
+                var acc = useFull ? (idx + 1) : idx;
+                var bestFree = Infinity;
+                /* Try every valid free exchange moving req from idx to pos <= idx */
+                var without = p.slice(0, idx).concat(p.slice(idx + 1));
+                for (var q = 0; q <= idx; q++) {
+                    var cand = without.slice(0, q).concat([req], without.slice(q));
+                    var cIdx = keyOf[cand.join("\x00")];
+                    if (dp[cIdx] < bestFree) bestFree = dp[cIdx];
+                }
+                afterProbe[s] = acc + bestFree;
+            }
+            /* Close under paid exchanges before probing step t */
+            var nextDp = new Array(S).fill(Infinity);
+            for (var u = 0; u < S; u++) {
+                for (var v = 0; v < S; v++) {
+                    var val = distMat[u][v] + afterProbe[v];
+                    if (val < nextDp[u]) nextDp[u] = val;
                 }
             }
-
-            step++;
-            renderSequence();
-            updateAllLists(req);
+            dp = nextDp;
         }
+        return dp[keyOf[initL.join("\x00")]];
+    }
 
-        function resetSim() {
-            step = 0;
-            state = {
-                static: { list: [...initialList], cost: 0 },
-                mtf: { list: [...initialList], cost: 0 },
-                pda: { list: [...initialList], cost: 0 }
-            };
-            renderSequence();
-            updateAllLists();
+    function accessCharge(idx) {
+        return fullCostModel ? (idx + 1) : idx;
+    }
+
+    function initSimState() {
+        step = 0;
+        lastColors = {};
+        state = {
+            static: { list: initialList.slice(), acc: 0, paid: 0 },
+            mtf:    { list: initialList.slice(), acc: 0, paid: 0 },
+            nopaid: { list: initialList.slice(), acc: 0, paid: 0 },
+            pda:    { list: initialList.slice(), acc: 0, paid: 0 },
+            robust: { list: initialList.slice(), acc: 0, paid: 0, mode: "PDA" }
+        };
+        var optVal = computeExactOfflineOPT(initialList, sequence, fullCostModel);
+        document.getElementById("opt-total").textContent = optVal;
+        document.getElementById("bf-container").innerHTML =
+            "Advance one step to inspect <code>Distance(L &rarr; C; x) + Penalty(C)</code> across all " +
+            permutations(initialList).length + " permutations.";
+        document.getElementById("sim-log").innerHTML =
+            "Ready on <code>L = [" + initialList.join(", ") + "]</code> (" +
+            (fullCostModel ? "Full cost $i$" : "Partial cost $i-1$") +
+            (corruptOracle ? ", <strong style='color:#d93025'>Corrupted Oracle active</strong>" : ", Accurate Oracle") + ").";
+        renderAll(null);
+    }
+
+    function evaluatePDACandidates(curList, x, rem, allowPaid) {
+        var info = classifyColors(curList, x, rem);
+        var colors = info.colors;
+        var allPerms = permutations(curList);
+        var rows = [];
+
+        allPerms.forEach(function (C) {
+            var d = paidDistanceWithFreeX(curList, C, x);
+            if (!allowPaid && d > 0) return;
+            var p = penaltyCost(C, x, colors);
+            var mis = oneHopMismatch(C, x, rem);
+            var stayDist = kendallTau(curList, C);
+            rows.push({
+                C: C,
+                dist: d,
+                pen: p,
+                total: d + p,
+                mis: mis,
+                stayDist: stayDist
+            });
+        });
+
+        rows.sort(function (a, b) {
+            if (a.total !== b.total) return a.total - b.total;
+            if (a.dist !== b.dist) return a.dist - b.dist;     /* prefer fewer paid swaps on tie */
+            if (a.mis !== b.mis) return a.mis - b.mis;         /* 1-hop free tie-break */
+            return a.stayDist - b.stayDist;                    /* lazy stability */
+        });
+
+        return { best: rows[0], rows: rows, colors: colors };
+    }
+
+    function renderSequenceUI() {
+        var container = document.getElementById("sequence-ui");
+        container.innerHTML = "";
+        sequence.forEach(function (item, index) {
+            var el = document.createElement("div");
+            el.className = "seq-item" + (index === step ? " active" : index < step ? " past" : "");
+            el.textContent = item;
+            container.appendChild(el);
+        });
+        document.getElementById("step-counter").textContent = step + " / " + sequence.length;
+        document.getElementById("next-btn").disabled = step >= sequence.length;
+    }
+
+    function renderPanel(key, highlightItem, useColors) {
+        var s = state[key];
+        document.getElementById("cost-" + key).textContent = s.acc + s.paid;
+        document.getElementById("bd-" + key).textContent = "acc " + s.acc + " + paid " + s.paid;
+        var container = document.getElementById("list-" + key);
+        container.innerHTML = "";
+        s.list.forEach(function (item, idx) {
+            var el = document.createElement("div");
+            var cls = "list-item";
+            if (item === highlightItem) cls += " highlight";
+            if (useColors && lastColors[item]) {
+                cls += " col-" + lastColors[item];
+            }
+            el.className = cls;
+            el.innerHTML = '<span class="pos-idx">#' + (idx + 1) + '</span><span>' + item + '</span>';
+            container.appendChild(el);
+        });
+    }
+
+    function renderAll(highlightItem) {
+        renderSequenceUI();
+        renderPanel("static", highlightItem, false);
+        renderPanel("mtf", highlightItem, false);
+        renderPanel("nopaid", highlightItem, true);
+        renderPanel("pda", highlightItem, true);
+        renderPanel("robust", highlightItem, false);
+    }
+
+    function renderBruteForceTable(curBefore, x, evalRes) {
+        var rows = evalRes.rows;
+        var html = '<div style="margin-bottom:6px">From pre-move <code>L = [' + curBefore.join(", ") +
+            ']</code> on request <code>x = ' + x + '</code> (' + rows.length + ' permutations evaluated):</div>';
+        html += '<table class="bf-table"><thead><tr><th>Candidate C</th><th>Paid Distance</th><th>Color Penalty</th><th>Total (D + P)</th></tr></thead><tbody>';
+        var limit = Math.min(rows.length, 10);
+        for (var i = 0; i < limit; i++) {
+            var r = rows[i];
+            html += '<tr class="' + (i === 0 ? 'bf-winner' : '') + '">' +
+                '<td>[' + r.C.join(", ") + ']' + (i === 0 ? ' &starf;' : '') + '</td>' +
+                '<td>' + r.dist + '</td>' +
+                '<td>' + r.pen + '</td>' +
+                '<td>' + r.total + '</td></tr>';
         }
+        html += '</tbody></table>';
+        if (rows.length > limit) {
+            html += '<div style="margin-top:4px;font-size:11.5px">Showing top ' + limit + ' of ' + rows.length + ' configurations.</div>';
+        }
+        document.getElementById("bf-container").innerHTML = html;
+    }
 
-        // Initialize UI
-        renderSequence();
-        updateAllLists();
-    </script>
+    function stepOnce() {
+        if (step >= sequence.length) {
+            stopAuto();
+            return;
+        }
+        var req = sequence[step];
+        var rem = sequence.slice(step + 1);
+
+        /* 1. Static */
+        var stIdx = state.static.list.indexOf(req);
+        state.static.acc += accessCharge(stIdx);
+
+        /* 2. MTF */
+        var mtfIdx = state.mtf.list.indexOf(req);
+        state.mtf.acc += accessCharge(mtfIdx);
+        state.mtf.list.splice(mtfIdx, 1);
+        state.mtf.list.unshift(req);
+
+        /* 3. TwoHopsNoPaid (free moves only) */
+        var npIdx = state.nopaid.list.indexOf(req);
+        state.nopaid.acc += accessCharge(npIdx);
+        var npEval = evaluatePDACandidates(state.nopaid.list, req, rem, false);
+        state.nopaid.list = npEval.best.C.slice();
+
+        /* 4. Full PDA (brute-force over S_l) */
+        var pdaBefore = state.pda.list.slice();
+        var pdaIdx = state.pda.list.indexOf(req);
+        state.pda.acc += accessCharge(pdaIdx);
+        var pdaEval = evaluatePDACandidates(state.pda.list, req, rem, true);
+        state.pda.paid += pdaEval.best.dist;
+        state.pda.list = pdaEval.best.C.slice();
+        lastColors = pdaEval.colors;
+
+        /* 5. Robust Hybrid (MTS partial-cost threshold guard tracking PDA vs. MTF) */
+        var robIdx = state.robust.list.indexOf(req);
+        state.robust.acc += accessCharge(robIdx);
+        var base = fullCostModel ? (step + 1) : 0;
+        var pdaPart = (state.pda.acc - base) + state.pda.paid;
+        var mtfPart = (state.mtf.acc - base) + state.mtf.paid;
+        var guardSlack = Math.max(1, initialList.length - 1);
+        var targetList;
+        if (state.robust.mode === "MTF-Fallback" || pdaPart > mtfPart + guardSlack) {
+            state.robust.mode = "MTF-Fallback";
+            targetList = state.mtf.list.slice();
+        } else {
+            state.robust.mode = "PDA";
+            targetList = state.pda.list.slice();
+        }
+        var robPaid = paidDistanceWithFreeX(state.robust.list, targetList, req);
+        state.robust.paid += robPaid;
+        state.robust.list = targetList;
+
+        step++;
+        renderAll(req);
+        renderBruteForceTable(pdaBefore, req, pdaEval);
+
+        var colorDesc = initialList.filter(function (v) { return v !== req; }).map(function (v) {
+            return v + "=" + lastColors[v].toUpperCase();
+        }).join(", ");
+
+        document.getElementById("sim-log").innerHTML =
+            "<strong>Step " + step + " (req <code>" + req + "</code>):</strong> " +
+            "Oracle colors [" + colorDesc + "]. " +
+            "PDA transitions <code>[" + pdaBefore.join(",") + "] &rarr; [" + state.pda.list.join(",") + "]</code> " +
+            "(paid swaps: <strong>" + pdaEval.best.dist + "</strong>, remaining penalty: <strong>" + pdaEval.best.pen + "</strong>). " +
+            "Robust mode: <strong>" + state.robust.mode + "</strong>.";
+
+        if (step >= sequence.length) stopAuto();
+    }
+
+    function stopAuto() {
+        if (autoTimer) {
+            clearInterval(autoTimer);
+            autoTimer = null;
+            document.getElementById("auto-btn").textContent = "Auto-Play";
+            document.getElementById("auto-btn").classList.remove("active");
+        }
+    }
+
+    document.getElementById("next-btn").addEventListener("click", stepOnce);
+    document.getElementById("reset-btn").addEventListener("click", function () {
+        stopAuto();
+        initSimState();
+    });
+    document.getElementById("auto-btn").addEventListener("click", function () {
+        if (autoTimer) {
+            stopAuto();
+        } else {
+            if (step >= sequence.length) initSimState();
+            document.getElementById("auto-btn").textContent = "Pause";
+            document.getElementById("auto-btn").classList.add("active");
+            autoTimer = setInterval(stepOnce, 750);
+        }
+    });
+
+    document.getElementById("model-btn").addEventListener("click", function () {
+        stopAuto();
+        fullCostModel = !fullCostModel;
+        var btn = document.getElementById("model-btn");
+        btn.textContent = fullCostModel ? "Cost: Full (i)" : "Cost: Partial (i − 1)";
+        btn.classList.toggle("active", !fullCostModel);
+        initSimState();
+    });
+
+    document.getElementById("corrupt-btn").addEventListener("click", function () {
+        stopAuto();
+        corruptOracle = !corruptOracle;
+        var btn = document.getElementById("corrupt-btn");
+        btn.innerHTML = corruptOracle ? "&#9889; Corrupt Oracle: ON" : "&#9889; Corrupt Oracle: OFF";
+        btn.classList.toggle("active", corruptOracle);
+        btn.setAttribute("aria-pressed", corruptOracle);
+        initSimState();
+    });
+
+    document.querySelectorAll("#fig-sim [data-preset]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            stopAuto();
+            var p = PRESETS[btn.dataset.preset];
+            initialList = p.list.slice();
+            sequence = p.seq.slice();
+            document.getElementById("inp-list").value = initialList.join(",");
+            document.getElementById("inp-seq").value = sequence.join(",");
+            document.querySelectorAll("#fig-sim [data-preset]").forEach(function (b) {
+                b.classList.toggle("active", b === btn);
+            });
+            initSimState();
+        });
+    });
+
+    document.getElementById("btn-apply").addEventListener("click", function () {
+        stopAuto();
+        var rawL = document.getElementById("inp-list").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+        var seen = {};
+        var cleanL = [];
+        rawL.forEach(function (x) { if (!seen[x] && cleanL.length < 4) { seen[x] = true; cleanL.push(x); } });
+        if (cleanL.length < 2) {
+            document.getElementById("sim-log").innerHTML = "<strong style='color:#d93025'>Enter 2 to 4 distinct items for the list.</strong>";
+            return;
+        }
+        var rawS = document.getElementById("inp-seq").value.split(",").map(function (s) { return s.trim(); }).filter(function (x) { return seen[x]; });
+        if (rawS.length < 1) {
+            document.getElementById("sim-log").innerHTML = "<strong style='color:#d93025'>Sequence must contain items from the list.</strong>";
+            return;
+        }
+        initialList = cleanL;
+        sequence = rawS.slice(0, 24);
+        document.querySelectorAll("#fig-sim [data-preset]").forEach(function (b) { b.classList.remove("active"); });
+        initSimState();
+    });
+
+    initSimState();
+})();
+</script>
 </body>
 </html>

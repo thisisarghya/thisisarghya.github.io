@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bare Metal vs. Virtual Machines: Why Building Bare Metal Is Fun - Arghya Bhattacharya</title>
+    <meta name="description" content="A high-level, interactive tour of bare metal cloud architecture, how it differs from a standard virtual machine, and why engineering it is so much fun.">
+    <!-- This page lives in blogs/an_artichoke_of_algorithm/, so every top-level asset needs ../../ -->
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="icon" type="image/jpg" href="../../images/artichoke.jpg">
+
+    <style>
+        /* ---------- Palette ---------- */
+        :root {
+            --bm-navy: #172b4d;
+            --bm-blue: #4285F4;
+            --bm-green: #34A853;
+            --bm-yellow: #FBBC04;
+            --bm-red: #EA4335;
+            --bm-ink: #2c3e50;
+            --bm-muted: #5f6368;
+            --bm-line: #dadce0;
+            --bm-soft: #f1f3f4;
+            --bm-card: #ffffff;
+        }
+
+        /* ---------- Article header: dark banner, distinct from the light Blogs landing header ---------- */
+        .post-header {
+            position: relative;
+            margin: 0 0 32px 0;
+            padding: 28px 32px 32px 32px;
+            border-radius: 16px;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(23, 43, 77, 0.92), rgba(66, 133, 244, 0.85));
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .post-breadcrumb {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 18px;
+        }
+        .post-breadcrumb a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .post-tag {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.18);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .post-header h1 {
+            margin: 0 0 12px 0;
+            font-size: 32px;
+            line-height: 1.25;
+            color: #fff;
+        }
+        .post-meta {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* ---------- Back button ---------- */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #4285F4;
+            border-radius: 20px;
+            color: #4285F4;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .back-button:hover,
+        .back-button:focus {
+            background-color: #4285F4;
+            color: #fff;
+        }
+        .post-header .back-button {
+            margin-bottom: 18px;
+            border-color: #fff;
+            color: #fff;
+            background: transparent;
+        }
+        .post-header .back-button:hover,
+        .post-header .back-button:focus {
+            background: #fff;
+            color: #172b4d;
+        }
+
+        /* ---------- Article body ---------- */
+        .blog-post {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .blog-post p,
+        .blog-post li {
+            line-height: 1.7;
+        }
+        .blog-post ul {
+            list-style-type: square;
+        }
+        .blog-post li {
+            margin-bottom: 10px;
+        }
+        .post-footer {
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .callout {
+            margin: 24px 0;
+            padding: 16px 20px;
+            border-left: 4px solid var(--bm-blue);
+            border-radius: 8px;
+            background: #e8f0fe;
+        }
+        .callout.note { border-color: var(--bm-muted); background: var(--bm-soft); font-size: 15px; }
+        .callout.tldr { border-color: var(--bm-green); background: #e6f4ea; }
+        .callout strong:first-child { display: block; margin-bottom: 4px; }
+
+        /* ---------- Interactive figure shell ---------- */
+        .figure {
+            margin: 28px 0 36px 0;
+            padding: 20px;
+            border: 1px solid var(--bm-line);
+            border-radius: 14px;
+            background: #fafbfc;
+        }
+        .figure-caption { margin-top: 12px; font-size: 14px; color: var(--bm-muted); text-align: center; }
+        .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; justify-content: center; }
+        .btn {
+            padding: 7px 14px;
+            border: 1px solid var(--bm-blue);
+            border-radius: 18px;
+            background: #fff;
+            color: var(--bm-blue);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+        }
+        .btn:hover, .btn:focus-visible { background: #e8f0fe; }
+        .btn.active { background: var(--bm-blue); color: #fff; }
+        .btn.danger { border-color: var(--bm-red); color: var(--bm-red); }
+        .btn.danger.active { background: var(--bm-red); color: #fff; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* ---------- Figure 1: architecture explorer ---------- */
+        .chassis {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 14px;
+            padding: 16px;
+            border: 3px solid #9aa0a6;
+            border-radius: 12px;
+            background: repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #f8f9fa 10px, #f8f9fa 20px);
+        }
+        .node {
+            position: relative;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid var(--bm-line);
+            background: var(--bm-card);
+            transition: border-color 0.4s, box-shadow 0.4s;
+        }
+        .node-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--bm-navy);
+        }
+        .node-title small { font-weight: 500; color: var(--bm-muted); font-size: 12px; }
+        .node.host-box { grid-row: 1 / span 2; border-color: var(--bm-blue); display: flex; flex-direction: column; }
+        .node.host-box .chip-list { flex: 1; }
+        .chip.customer { flex: 1; display: flex; align-items: center; justify-content: center; }
+        .node.card { border-color: var(--bm-green); }
+        .node.card .subnode { padding: 8px; margin-top: 8px; border: 1px dashed var(--bm-green); border-radius: 8px; }
+        .node.bmc { border-color: var(--bm-yellow); }
+        .chip-list { display: flex; flex-direction: column; gap: 6px; min-height: 30px; }
+        .chip-row { display: flex; gap: 6px; }
+        .chip-row .chip { flex: 1; }
+        .chip {
+            padding: 7px 10px;
+            border-radius: 7px;
+            background: var(--bm-soft);
+            border: 1px solid transparent;
+            font-size: 13px;
+            line-height: 1.3;
+            cursor: pointer;
+            text-align: center;
+            animation: chip-in 0.45s ease both;
+            transition: transform 0.15s, border-color 0.2s;
+        }
+        .chip:hover, .chip:focus-visible { transform: translateY(-1px); border-color: var(--bm-blue); outline: none; }
+        .chip.selected { border-color: var(--bm-blue); box-shadow: 0 0 0 2px rgba(66,133,244,0.25); }
+        .chip.guest { background: #e8f0fe; }
+        .chip.customer { background: linear-gradient(135deg, #fce8e6, #fef7e0); font-weight: 600; padding: 28px 10px; }
+        .chip.provider { background: #e6f4ea; }
+        .chip.hw { background: #e8eaed; font-family: monospace; }
+        .chip.moved { animation: chip-in 0.45s ease both, moved-glow 1.6s ease 0.45s 2; }
+        .host-badge {
+            margin-top: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            line-height: 1.4;
+            background: #fce8e6;
+            color: #a50e0e;
+            animation: chip-in 0.45s ease both;
+        }
+        @keyframes chip-in { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
+        @keyframes moved-glow { 50% { box-shadow: 0 0 0 4px rgba(52,168,83,0.45); } }
+        .info-panel {
+            margin-top: 14px;
+            padding: 12px 16px;
+            min-height: 48px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px solid var(--bm-line);
+            font-size: 15px;
+        }
+        .legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 10px; font-size: 13px; color: var(--bm-muted); }
+        .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 3px; vertical-align: -1px; background: var(--sw); }
+
+        /* ---------- Figure 2: out-of-band telemetry ---------- */
+        .pipeline { display: flex; align-items: stretch; justify-content: space-between; gap: 0; }
+        .stage {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 6px;
+            border: 2px solid var(--bm-line);
+            border-radius: 10px;
+            background: #fff;
+            text-align: center;
+            font-size: 13px;
+            transition: border-color 0.25s, background-color 0.25s, transform 0.25s;
+        }
+        .stage .icon { font-size: 22px; display: block; margin-bottom: 4px; }
+        .stage.lit { border-color: var(--bm-blue); background: #e8f0fe; transform: translateY(-3px); }
+        .stage.dark { border-color: var(--bm-red); background: #fce8e6; }
+        .wire {
+            position: relative;
+            flex: 0 0 28px;
+            align-self: center;
+            height: 4px;
+            background: var(--bm-line);
+            border-radius: 2px;
+        }
+        .wire.pulse { background: var(--bm-blue); }
+        .wire.cut { background: repeating-linear-gradient(90deg, var(--bm-red) 0 5px, transparent 5px 9px); }
+        .wire.cut::after { content: "✂"; position: absolute; top: -16px; left: 6px; font-size: 14px; color: var(--bm-red); }
+        .log {
+            margin-top: 16px;
+            padding: 12px 14px;
+            height: 150px;
+            overflow-y: auto;
+            border-radius: 10px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+            font-size: 12.5px;
+            line-height: 1.55;
+        }
+        .log .ok { color: #81c995; }
+        .log .warn { color: #fdd663; }
+        .log .err { color: #f28b82; }
+        .log .dim { color: #9aa0a6; }
+
+        /* ---------- Figure 3: maintenance ---------- */
+        .lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .lane { padding: 14px; border-radius: 12px; background: #fff; border: 1px solid var(--bm-line); }
+        .lane h4 { margin: 0 0 10px 0; color: var(--bm-navy); }
+        .uptime { font-family: monospace; font-size: 13px; margin-bottom: 10px; }
+        .uptime b { font-size: 15px; }
+        .uptime .down { color: var(--bm-red); }
+        .uptime .up { color: var(--bm-green); }
+        .hosts { position: relative; display: flex; justify-content: space-between; height: 92px; }
+        .host {
+            width: 44%;
+            border: 2px solid #9aa0a6;
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 12px;
+            text-align: center;
+            color: var(--bm-muted);
+            background: #f8f9fa;
+            transition: background-color 0.3s;
+        }
+        .host.updating { background: #fef7e0; border-color: var(--bm-yellow); }
+        .vm-token {
+            position: absolute;
+            top: 30px;
+            left: 4%;
+            width: 36%;
+            padding: 10px 0;
+            border-radius: 7px;
+            background: var(--bm-blue);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            transition: left 1.6s cubic-bezier(.6,.05,.3,1);
+        }
+        .vm-token.migrated { left: 60%; }
+        .steps { list-style: none; padding: 0; margin: 0; counter-reset: s; font-size: 13.5px; }
+        .steps li {
+            counter-increment: s;
+            position: relative;
+            padding: 5px 8px 5px 34px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            color: var(--bm-muted);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .steps li::before {
+            content: counter(s);
+            position: absolute;
+            left: 6px; top: 5px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--bm-line);
+            color: #fff;
+            font-size: 11px;
+            line-height: 20px;
+            text-align: center;
+        }
+        .steps li.current { background: #fef7e0; color: var(--bm-ink); font-weight: 600; }
+        .steps li.current::before { background: var(--bm-yellow); }
+        .steps li.done { color: var(--bm-ink); }
+        .steps li.done::before { content: "✓"; background: var(--bm-green); }
+
+        /* ---------- Figure 4: lifecycle ---------- */
+        .ring {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 26px 34px;
+            position: relative;
+        }
+        .state {
+            position: relative;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid var(--bm-line);
+            background: #fff;
+            text-align: center;
+            font-size: 13.5px;
+            transition: border-color 0.3s, background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+        .state b { display: block; color: var(--bm-navy); margin-bottom: 2px; font-size: 14px; }
+        .state.active { border-color: var(--bm-blue); background: #e8f0fe; transform: scale(1.04); box-shadow: 0 4px 14px rgba(66,133,244,0.25); }
+        .state.warn { border-color: var(--bm-red); background: #fce8e6; }
+        .state.secure { border-style: dashed; }
+        .state .arrow { position: absolute; color: #9aa0a6; font-size: 20px; font-weight: 700; }
+        .state .arrow.r { right: -27px; top: 50%; transform: translateY(-50%); }
+        .state .arrow.l { left: -27px; top: 50%; transform: translateY(-50%); }
+        .state .arrow.d { bottom: -27px; left: 50%; transform: translateX(-50%); }
+        .state .arrow.u { top: -27px; left: 50%; transform: translateX(-50%); }
+        .state .arrow.ur { right: -25px; top: -25px; }
+        .event-text {
+            margin-top: 18px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px solid var(--bm-line);
+            min-height: 70px;
+            font-size: 15px;
+        }
+        .event-text .evt { font-weight: 700; color: var(--bm-blue); }
+
+        /* ---------- Comparison table ---------- */
+        .compare { width: 100%; border-collapse: collapse; font-size: 15px; margin: 20px 0; }
+        .compare th, .compare td { padding: 10px 12px; border: 1px solid var(--bm-line); vertical-align: top; text-align: left; }
+        .compare th { background: var(--bm-soft); color: var(--bm-navy); }
+        .compare td:first-child { font-weight: 600; white-space: nowrap; }
+
+        /* ---------- Fun cards ---------- */
+        .fun-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin: 24px 0; }
+        .fun-card { perspective: 900px; height: 190px; cursor: pointer; outline: none; }
+        .fun-inner {
+            position: relative;
+            width: 100%; height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .fun-card:hover .fun-inner, .fun-card:focus .fun-inner, .fun-card.flipped .fun-inner { transform: rotateY(180deg); }
+        .fun-face {
+            position: absolute;
+            inset: 0;
+            padding: 18px;
+            border-radius: 14px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .fun-front { background: #fff; border-top: 5px solid var(--accent); text-align: center; }
+        .fun-front .emoji { font-size: 36px; }
+        .fun-front h4 { margin: 10px 0 0 0; color: var(--bm-navy); font-size: 16px; }
+        .fun-back { background: var(--accent); color: #fff; transform: rotateY(180deg); font-size: 14px; line-height: 1.5; }
+        .hint { text-align: center; font-size: 13px; color: var(--bm-muted); }
+
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 720px) {
+            .post-header { padding: 20px; }
+            .post-header h1 { font-size: 24px; }
+            .chassis { grid-template-columns: 1fr; }
+            .node.host-box { grid-row: auto; }
+            .lanes { grid-template-columns: 1fr; }
+            .pipeline { flex-direction: column; }
+            .wire { flex: 0 0 18px; width: 4px; height: 18px; }
+            .ring { grid-template-columns: 1fr; gap: 26px; }
+            .state .arrow { display: none; }
+            .compare td:first-child { white-space: normal; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="../../index.html">Home</a>
+    <a href="../../experience.html">Work Experience</a>
+    <a href="../../publications.html">Publications &amp; Talks</a>
+    <a href="../../blogs.html" class="active">Blogs &amp; About</a>
+</nav>
+
+<main>
+    <article class="blog-post">
+        <header class="post-header">
+            <a href="../../an_artichoke_of_algorithm.html" class="back-button">&larr; Back to An Artichoke of Algorithm</a>
+            <div class="post-breadcrumb"><a href="../../an_artichoke_of_algorithm.html">An Artichoke of Algorithm</a> &rsaquo; Systems</div>
+            <span class="post-tag">Systems &middot; Cloud Infrastructure</span>
+            <h1>Bare Metal vs. Virtual Machines: Why Building Bare Metal Is So Much Fun</h1>
+            <div class="post-meta">Arghya Bhattacharya &middot; March 2026 &middot; <span id="read-time">9</span> min read</div>
+        </header>
+
+
+            <div class="callout note">
+                <strong>A quick disclaimer</strong>
+                I work on bare metal cloud infrastructure at Google. Views here are my own, and everything in this post sticks to
+                public, industry-wide bare metal concepts rather than the internal design of any specific cloud provider.
+            </div>
+
+            <div class="callout tldr">
+                <strong>TL;DR</strong>
+                A bare metal instance hands the customer an entire physical server with no hypervisor in between. To make that feel like a
+                cloud instance—with elastic networking, cloud disks, and API-driven power control—every piece of provider software has to
+                move <em>off</em> the main host CPUs and onto separate management and offload processors inside the box. That single
+                constraint changes how you monitor, maintain, scrub, and update a server, and that is what makes it so much fun to build.
+            </div>
+
+            <h2>A mental model: renting an apartment vs. renting the house</h2>
+            <p>
+                A <strong>virtual machine (VM)</strong> is like an apartment in a managed building. The landlord (the cloud provider) owns
+                the building, keeps a master key, runs the plumbing, and can even move you to an identical apartment overnight while you
+                sleep, without you noticing. That overnight move is <em>live migration</em>.
+            </p>
+            <p>
+                A <strong>bare metal instance</strong> is like renting the entire house. You get every room and you can remodel the
+                kitchen (run your own OS kernel, or bring your own hypervisor). The landlord does <em>not</em> get a key. Yet the landlord
+                still has to deliver water, electricity, and internet, read the meters, and notice if a pipe bursts. All of that has to
+                happen from the outside: from the utility box at the curb.
+            </p>
+            <p>
+                Bare metal engineering is the art of building a really good utility box.
+            </p>
+
+            <h2>Anatomy of a modern cloud server</h2>
+            <p>
+                Traditional dedicated-server hosting (and open-source frameworks like OpenStack Ironic) provisions bare metal using a
+                motherboard management controller plus top-of-rack switch and PXE-boot automation. Modern hyperscaler clouds go a step
+                further: they pair the server with a dedicated <strong>hardware offload card</strong>—known across the industry as a DPU,
+                IPU, or SmartNIC (public examples include AWS Nitro, Azure Boost, NVIDIA BlueField, Intel IPUs, and Google Cloud Titanium).
+            </p>
+            <p>
+                Viewed that way, a modern cloud server is not one computer—it is a small team of independent computers sharing one chassis:
+            </p>
+            <ul>
+                <li><strong>Host Server (Main CPUs &amp; Memory)</strong>: the big x86 or Arm sockets and DRAM where customer workloads run.</li>
+                <li><strong>Offload Card (DPU / IPU / SmartNIC)</strong>: a separate computer on the PCIe bus—with its own general-purpose cores, hardware crypto/storage/packet engines, and an onboard root-of-trust controller that boots and secures the card itself.</li>
+                <li><strong>BMC &amp; Hardware Root of Trust</strong>: an always-on Baseboard Management Controller on the motherboard (often paired with a dedicated security microcontroller) that controls power, reads physical sensors, logs hardware faults, and verifies firmware integrity.</li>
+            </ul>
+            <p>
+                Both a virtualized host and an offloaded bare metal host can share this exact hardware layout. What changes is
+                <em>who runs what, where</em>. Flip the switch below and watch the provider software vacate the host server:
+            </p>
+
+            <!-- ===== Figure 1 ===== -->
+            <div class="figure" id="fig-arch">
+                <div class="controls" role="group" aria-label="Choose architecture">
+                    <button class="btn active" data-mode="vm" type="button">Standard VM host</button>
+                    <button class="btn" data-mode="bm" type="button">Bare metal host</button>
+                </div>
+                <div class="chassis">
+                    <div class="node host-box">
+                        <div class="node-title">Host Server <small id="host-owner">shared by many tenants</small></div>
+                        <div class="chip-list" id="slot-host"></div>
+                    </div>
+                    <div class="node card">
+                        <div class="node-title">Offload Card <small>DPU / IPU / SmartNIC</small></div>
+                        <div class="subnode">
+                            <div class="node-title">Offload Cores &amp; Engines <small>control + I/O</small></div>
+                            <div class="chip-list" id="slot-cores"></div>
+                        </div>
+                        <div class="subnode">
+                            <div class="node-title">Card Security Controller <small>card boot &amp; root of trust</small></div>
+                            <div class="chip-list" id="slot-rot"></div>
+                        </div>
+                    </div>
+                    <div class="node bmc">
+                        <div class="node-title">BMC &amp; Board Root of Trust <small>out-of-band</small></div>
+                        <div class="chip-list" id="slot-bmc"></div>
+                    </div>
+                </div>
+                <div class="legend">
+                    <span style="--sw:#e8f0fe">Customer guest VM</span>
+                    <span style="--sw:#fce8e6">Customer-owned OS</span>
+                    <span style="--sw:#e6f4ea">Provider software</span>
+                    <span style="--sw:#e8eaed">Hardware</span>
+                </div>
+                <div class="info-panel" id="arch-info" aria-live="polite">Click any block to learn what it does.</div>
+                <div class="figure-caption">Figure 1. Same physical server, different trust boundary. Glowing blocks moved off the host CPUs.</div>
+            </div>
+
+            <p>
+                On a standard VM host, the provider owns the host OS and hypervisor. Provider daemons run right on the main CPUs: they
+                spawn VMs, enforce isolation, read hardware counters in-band, and coordinate maintenance. Even when an offload card
+                accelerates packet and storage processing, the host CPU is still trusted territory.
+            </p>
+            <p>
+                On a bare metal host, the customer owns the host OS from the moment UEFI hands off control. From the provider's point of
+                view, the host server is <strong>completely untrusted</strong>: zero provider agents run on the host CPUs, and the host has
+                no path to the provider's internal management network. Every capability that makes a cloud instance feel "cloud-native" has
+                to live outside the host:
+            </p>
+            <ul>
+                <li><strong>Instance lifecycle</strong> (boot, stop, reboot, serial console, teardown) runs externally via the offload card and BMC.</li>
+                <li><strong>Software-defined networking</strong> runs on the offload card. The host OS sees a standard PCIe network device while VPC routing, firewall rules, and line-rate encryption happen on the card.</li>
+                <li><strong>Cloud block storage</strong> is emulated in hardware on the card as standard PCIe NVMe drives—so an unmodified customer OS can attach (and boot straight from) remote cloud disks with zero storage agents installed.</li>
+                <li><strong>Zero host CPU tax</strong>: 100% of the host cores, caches, performance counters, and hardware extensions stay available to the tenant.</li>
+            </ul>
+            <p>
+                I call this the <em>offload imperative</em>: the goal is to make a bare metal instance look and feel like a whole-machine
+                cloud VM—complete with elastic VPC networking and cloud block storage—while having none of the usual footholds on the host.
+            </p>
+
+            <h2>Difference #1: Telemetry has to come through the side door</h2>
+            <p>
+                On a VM host, if a memory DIMM starts throwing correctable ECC errors or a CPU core throttles, a daemon inside the host
+                kernel sees it immediately. On bare metal there is no host daemon. Out-of-band (OOB) management via the
+                <strong>BMC becomes the primary window into hardware health</strong>: ECC syndromes, temperatures, voltages, fan speeds,
+                power rails, UEFI POST codes, hardware boot-watchdog timers, and firmware versions.
+            </p>
+            <p>
+                Cloud health services poll or stream telemetry from the BMC—commonly over the industry-standard
+                <a href="https://www.dmtf.org/standards/redfish" target="_blank" rel="noopener">DMTF Redfish</a> API on an isolated
+                management plane—to diagnose failing parts and trigger repairs. Inject a fault below, then cut the management link:
+            </p>
+
+            <!-- ===== Figure 2 ===== -->
+            <div class="figure" id="fig-oob">
+                <div class="controls">
+                    <button class="btn" data-fault="ecc" type="button">💾 Memory ECC errors</button>
+                    <button class="btn" data-fault="thermal" type="button">🌡️ CPU overheating</button>
+                    <button class="btn" data-fault="boot" type="button">⏳ Boot stuck</button>
+                    <button class="btn danger" id="cut-btn" type="button" aria-pressed="false">✂ Cut OOB link</button>
+                </div>
+                <div class="pipeline">
+                    <div class="stage" data-stage="0"><span class="icon">🖥️</span>Host hardware</div>
+                    <div class="wire" data-wire="0"></div>
+                    <div class="stage" data-stage="1"><span class="icon">🔌</span>BMC (Redfish)</div>
+                    <div class="wire" data-wire="1"></div>
+                    <div class="stage" data-stage="2"><span class="icon">📡</span>OOB collector</div>
+                    <div class="wire" data-wire="2"></div>
+                    <div class="stage" data-stage="3"><span class="icon">📊</span>Fleet health</div>
+                    <div class="wire" data-wire="3"></div>
+                    <div class="stage" data-stage="4"><span class="icon">🛠️</span>Auto repair</div>
+                </div>
+                <div class="log" id="oob-log" aria-live="polite"><span class="dim">$ waiting for a fault... pick one above.</span></div>
+                <div class="figure-caption">Figure 2. Out-of-band (OOB) telemetry: watching hardware health without touching the host OS.</div>
+            </div>
+
+            <p>
+                Two engineering problems immediately pop out. First, if the BMC hangs or the OOB link drops, you go blind—you cannot tell
+                whether the server crashed or just your sensor path broke—so the telemetry pipeline itself needs health checks and
+                recovery. Second, standard server boards normally expose <em>in-band</em> host-to-BMC channels such as legacy IPMI
+                (<code>/dev/ipmi0</code>) or the DMTF Redfish Host Interface (a virtual USB/PCIe network socket to the BMC). On public cloud
+                bare metal, giving an untrusted root user raw BMC access is out of the question—a tenant could flash firmware, alter UEFI
+                settings, or wedge the management processor—so raw in-band channels are disabled or blocked in hardware. Whenever tenants or
+                guest tools legitimately need hardware health, serial console output, or power actions, clouds mediate them through a
+                <strong>strictly scoped API or allowlisted Redfish proxy</strong> that strips BMC credentials and permits only safe verbs.
+                Reasoning about exactly which operations can safely cross that proxy boundary is a classic bare metal security design problem.
+            </p>
+
+            <h2>Difference #2: No live migration safety net</h2>
+            <p>
+                For VMs, live migration is magic. When a physical server needs a motherboard repair or a host-kernel patch, the hypervisor
+                copies VM memory pages over the network to a healthy server with a sub-second pause, and the tenant barely notices. On bare
+                metal, there is no hypervisor underneath to move you: your OS is bound directly to that physical silicon, its PCIe topology,
+                and its local memory.
+            </p>
+            <p>
+                That means any maintenance that resets the host, replaces hardware, or reboots an offload card carrying active VPC and
+                storage I/O is <strong>disruptive</strong> to that instance. Instead of an invisible background move, bare metal clouds
+                coordinate planned maintenance windows with the customer (or rely on the customer's own cluster layer—like Kubernetes,
+                VMware HA, or database replication—to drain workloads first).
+            </p>
+
+            <!-- ===== Figure 3 ===== -->
+            <div class="figure" id="fig-maint">
+                <div class="controls">
+                    <button class="btn" id="maint-run" type="button">▶ Run maintenance on both</button>
+                    <button class="btn" id="maint-reset" type="button">↺ Reset</button>
+                </div>
+                <div class="lanes">
+                    <div class="lane">
+                        <h4>Standard VM</h4>
+                        <div class="uptime">Customer workload: <b class="up" id="vm-state">RUNNING</b> &middot; downtime <b id="vm-down">0.0</b>s</div>
+                        <div class="hosts">
+                            <div class="host" id="host-a">Host A</div>
+                            <div class="host" id="host-b">Host B</div>
+                            <div class="vm-token" id="vm-token">VM</div>
+                        </div>
+                        <p style="font-size:13.5px;color:#5f6368;margin:10px 0 0 0" id="vm-note">Live migration copies memory while the VM keeps running.</p>
+                    </div>
+                    <div class="lane">
+                        <h4>Bare metal</h4>
+                        <div class="uptime">Customer workload: <b class="up" id="bm-state">RUNNING</b> &middot; downtime <b id="bm-down">0.0</b>s</div>
+                        <ol class="steps" id="bm-steps">
+                            <li>Notify customer of maintenance window</li>
+                            <li>Customer drains workload or picks window</li>
+                            <li>Instance stops on this host</li>
+                            <li>Apply batched firmware / card updates + reboot</li>
+                            <li>Verify hardware &amp; firmware health</li>
+                            <li>Boot host back into customer OS</li>
+                            <li>Customer workload resumes</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="figure-caption">Figure 3. Same underlying host repair, two very different customer experiences (timescale compressed).</div>
+            </div>
+
+            <p>
+                Without live migration as a safety net, shrinking customer disruption becomes an architectural priority. Teams invest heavily
+                in turning disruptive updates into <strong>non-disruptive (hitless) updates</strong> wherever hardware allows—such as
+                live-patching Linux kernels on management/offload processors, or restarting DPU control-plane daemons in place while
+                hardware flow tables and NVMe queues keep forwarding packets and I/O uninterrupted. And when a cold reboot truly is required,
+                updates across BIOS, BMC, and offload cards have to be <strong>batched into unified maintenance bundles</strong>, paired with
+                early OOB fault prediction, so customers experience one planned window rather than death by a thousand reboots.
+            </p>
+
+            <h2>Difference #3: One physical fleet, two personalities—and what a "reinstall" really means</h2>
+            <p>
+                Because virtualization, VPC networking, and block storage live on external offload cards rather than on the motherboard,
+                modern clouds do not have to buy separate servers for VMs and bare metal. They can run a <strong>fungible fleet</strong>
+                where the exact same physical server has two personalities: in <strong>virtualized host mode</strong>, the host boots the
+                provider's verified OS and hypervisor to slice the box into multi-tenant VMs; in <strong>bare metal mode</strong>, no
+                provider OS runs on the host at all, and a single customer boots their own OS straight from an offloaded NVMe volume.
+            </p>
+            <p>
+                Managing transitions across—and within—those two modes is governed entirely by trust boundaries. Even staying inside bare
+                metal mode, deleting an instance is nothing like milliseconds-long VM teardown: because Tenant A had raw Ring-0 and PCIe
+                access, the server must go through a cold power cycle, local storage sanitization, and cryptographic firmware attestation
+                before Tenant B can touch it.
+            </p>
+
+            <!-- ===== Figure 4 ===== -->
+            <div class="figure" id="fig-life">
+                <div class="controls">
+                    <button class="btn" id="life-next" type="button">Next event ▶</button>
+                    <button class="btn" id="life-auto" type="button">Auto-play</button>
+                    <button class="btn" id="life-reset" type="button">↺ Reset</button>
+                </div>
+                <div class="ring">
+                    <div class="state" data-state="vmfleet"><b>Virtualized host</b>Provider OS + hypervisor; serves VMs<span class="arrow r">&rarr;</span></div>
+                    <div class="state" data-state="repurpose"><b>Mode repurpose</b>Drain VMs; seal mgmt net on card + BMC<span class="arrow r">&rarr;</span></div>
+                    <div class="state" data-state="ready"><b>Ready BM pool</b>Attested, clean, idle; ready for a tenant<span class="arrow r">&rarr;</span></div>
+                    <div class="state" data-state="serving"><b>Serving tenant</b>Customer OS owns host CPUs &amp; Ring-0<span class="arrow d">&darr;</span></div>
+                    <div class="state secure" data-state="reinstall"><b>Automated reinstall</b>Clean-slate wipe + OOB network OS imaging<span class="arrow u">&uarr;</span></div>
+                    <div class="state secure" data-state="attest"><b>Firmware attestation</b>Root of trust verifies BIOS, BMC &amp; card<span class="arrow ur" title="Back to Ready BM pool">&nearr;</span><span class="arrow l">&larr;</span></div>
+                    <div class="state secure" data-state="scrub"><b>Sanitize storage</b>Crypto-erase local NVMe &amp; reset NVRAM<span class="arrow l">&larr;</span></div>
+                    <div class="state secure" data-state="cycle"><b>Cold power cycle</b>Cut power via BMC; clear DRAM &amp; buses<span class="arrow l">&larr;</span></div>
+                </div>
+                <div class="event-text" id="life-text" aria-live="polite">Press <b>Next event</b> to walk a server through its fungible-fleet lifecycle.</div>
+                <div class="figure-caption">Figure 4. Fungible-fleet &amp; between-tenant lifecycle. Dashed boxes are security gates (<code>&nearr;</code> reuses in BM pool; <code>&larr;</code> re-images back to VM fleet).</div>
+            </div>
+
+            <p>
+                Notice the asymmetry when a server switches personalities. Moving a virtualized host <em>into</em> the bare metal pool starts
+                from a machine the provider already controls: drain VMs, scrub local flash, reconfigure the offload card and BMC to wall off
+                internal networks, verify attestation, and mark it ready. Moving <em>back</em> from bare metal to the virtualized fleet is
+                another story: an untrusted kernel owned every CPU register and local disk sector, so returning to trusted fleet duty
+                mandates a full <strong>automated bare-metal reinstall</strong> (clean-slate re-provisioning).
+            </p>
+            <p>
+                At cloud scale, "reinstall" does not mean a technician with a USB stick—it is an unattended, out-of-band imaging pipeline:
+                the BMC and offload card cold-cycle the host, cryptographically erase all local NVMe/boot media, reset UEFI/BIOS settings,
+                and verify every firmware hash from a hardware root of trust; next, the host network-boots a minimal signed provisioning
+                kernel (over an isolated boot VLAN or virtual media exposed by the offload card), streams a fresh, bit-for-bit verified
+                provider host OS and hypervisor image onto the boot drive, and validates measured-boot PCRs before the machine is allowed
+                anywhere near multi-tenant VMs again.
+            </p>
+
+            <h2>Difference #4: Multi-controller release bundles and raw PCIe devices</h2>
+            <p>
+                Updating a virtualized host mostly centers on one provider-controlled host OS. On an offloaded bare metal server, software
+                and firmware span several independent subsystems—system BIOS/UEFI, BMC, hardware root-of-trust microcontrollers, and the
+                offload card—each with its own boot sequence and rollback rules. Across a fleet of different CPU generations, NICs, and
+                accelerator trays, <strong>release composition itself becomes a design problem</strong>: deciding what belongs in a
+                locked-step platform firmware bundle, what needs a hardware-SKU-specific override, and what can ship as an independently
+                live-updatable control-plane package without breaking UEFI Secure Boot or Measured Boot chains.
+            </p>
+            <p>
+                The guest device model is rawer too. Instead of paravirtual interfaces (<code>virtio</code> and friends) where a hypervisor
+                smooths over hardware quirks behind a synthetic device, a bare metal tenant interacts directly with PCIe physical
+                functions—high-speed NICs, NVMe controllers, GPUs, or RDMA fabrics. Making sure standard OS drivers, IOMMU mappings, and
+                PCIe function-level resets behave cleanly across whatever OS or third-party hypervisor a customer brings makes every new
+                hardware generation genuinely interesting.
+            </p>
+
+            <h2>Side by side</h2>
+            <table class="compare">
+                <thead>
+                    <tr><th>Aspect</th><th>Standard VM</th><th>Bare metal</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Who owns the host OS</td><td>Provider (host kernel + hypervisor)</td><td>Customer (their OS or their own hypervisor)</td></tr>
+                    <tr><td>Provider agents on host CPUs</td><td>Yes</td><td>None; the host is untrusted</td></tr>
+                    <tr><td>Control &amp; I/O plane</td><td>Hypervisor + host daemons (+ offload)</td><td>Offload card (DPU/IPU) + BMC</td></tr>
+                    <tr><td>Health telemetry</td><td>In-band host agents + OOB</td><td>Out-of-band only (BMC / Redfish + scoped proxies)</td></tr>
+                    <tr><td>Host maintenance</td><td>Live migration, mostly invisible</td><td>Scheduled windows + hitless DPU/mgmt updates where possible</td></tr>
+                    <tr><td>Between tenants</td><td>Hypervisor memory/device teardown</td><td>Cold power cycle + storage scrub + firmware attestation</td></tr>
+                    <tr><td>Fleet fungibility</td><td>Already runs trusted provider OS</td><td>Repurposable; full OOB OS reinstall required to rejoin VM fleet</td></tr>
+                    <tr><td>Guest devices</td><td>Virtual / paravirtual NIC and disks</td><td>Direct PCIe functions, NVMe, accelerators</td></tr>
+                    <tr><td>Host CPU overhead</td><td>Small virtualization tax</td><td>Zero hypervisor overhead; 100% of host cores</td></tr>
+                </tbody>
+            </table>
+
+            <h2>So why is it fun?</h2>
+            <p class="hint">Hover over (or tap) a card to flip it.</p>
+            <div class="fun-grid">
+                <div class="fun-card" tabindex="0" style="--accent:#4285F4">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🧅</div><h4>You touch every layer</h4></div>
+                        <div class="fun-face fun-back">UEFI/BIOS, BMCs, DPUs/SmartNICs, Linux kernels, fleet automation, and cloud APIs. A single investigation can take you from a voltage sensor all the way up to the cloud console.</div>
+                    </div>
+                </div>
+                <div class="fun-card" tabindex="0" style="--accent:#34A853">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🕸️</div><h4>A distributed system in one box</h4></div>
+                        <div class="fun-face fun-back">Multiple independent computers inside one chassis—host CPUs, offload card, BMC, and security controllers—have to agree on machine state. Timeouts and race conditions happen inside a single server.</div>
+                    </div>
+                </div>
+                <div class="fun-card" tabindex="0" style="--accent:#EA4335">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🔐</div><h4>Security is the design</h4></div>
+                        <div class="fun-face fun-back">The tenant has Ring-0 access to the physical host, so every boundary—PCIe buses, scoped BMC proxies, storage scrubbing, power cycles, and attestation—is a first-class design problem.</div>
+                    </div>
+                </div>
+                <div class="fun-card" tabindex="0" style="--accent:#FBBC04">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🕵️</div><h4>Debugging is detective work</h4></div>
+                        <div class="fun-face fun-back">You cannot SSH into the host OS. You reconstruct what happened from BMC event logs, Redfish sensors, POST codes, and offload-card telemetry. Solving those mysteries is deeply satisfying.</div>
+                    </div>
+                </div>
+                <div class="fun-card" tabindex="0" style="--accent:#172b4d">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🎪</div><h4>No safety net</h4></div>
+                        <div class="fun-face fun-back">Without live migration, every maintenance workflow, firmware rollout, and hardware repair is felt by real workloads. It pushes you to engineer carefully and measure everything.</div>
+                    </div>
+                </div>
+                <div class="fun-card" tabindex="0" style="--accent:#9334E6">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🚀</div><h4>New silicon in the raw</h4></div>
+                        <div class="fun-face fun-back">New CPU generations, PCIe speeds, and accelerators keep arriving, and bare metal is where customers meet new hardware in its purest, un-virtualized form.</div>
+                    </div>
+                </div>
+                <div class="fun-card" tabindex="0" style="--accent:#12B5CB">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🤝</div><h4>Cross-stack collaboration</h4></div>
+                        <div class="fun-face fun-back">Virtual networking, cloud block storage, RDMA, accelerators, firmware, and hardware security all converge on the physical box—so you constantly learn from experts across the stack.</div>
+                    </div>
+                </div>
+                <div class="fun-card" tabindex="0" style="--accent:#E8710A">
+                    <div class="fun-inner">
+                        <div class="fun-face fun-front"><div class="emoji">🎯</div><h4>Workloads that truly need it</h4></div>
+                        <div class="fun-face fun-back">Customers running third-party hypervisors, large in-memory databases, strict per-socket licenses, or ultra-low-jitter workloads cannot use ordinary VMs. You build the foundation they rely on.</div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Wrapping up</h2>
+            <p>
+                Engineering bare metal in the cloud is a fun inversion of traditional systems design: you hand the main computer to the
+                customer, move the cloud's control and data planes onto surrounding silicon, and lean on out-of-band telemetry and
+                hardware-rooted security to keep the fleet healthy and trustworthy. Every constraint turns routine VM assumptions into fresh
+                systems puzzles—and solving those puzzles is why I love working in this space.
+            </p>
+            <p>
+                A big thank you to my teammates working on Bare Metal at Google, past and present, for always making time for questions,
+                sharing deep systems knowledge in tech talks and hackathons, and making day-to-day engineering so collaborative.
+            </p>
+
+        <footer class="post-footer">
+            <a href="../../an_artichoke_of_algorithm.html" class="back-button">&larr; Back to An Artichoke of Algorithm</a>
+        </footer>
+    </article>
+</main>
+
+    <script>
+    (function () {
+        "use strict";
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* ---------- Read time ---------- */
+        var words = document.querySelector(".blog-post").innerText.split(/\s+/).length;
+        document.getElementById("read-time").textContent = Math.max(1, Math.round(words / 300));
+
+        /* ---------- Figure 1: architecture explorer ---------- */
+        var ARCH = {
+            vm: {
+                owner: "shared by many tenants",
+                host: [
+                    { row: [
+                        { t: "Guest VM", c: "guest", d: "A customer's virtual machine. Many guests share one physical server, isolated by the hypervisor." },
+                        { t: "Guest VM", c: "guest", d: "Another tenant's VM on the same host. The hypervisor enforces CPU, memory, and device isolation." },
+                        { t: "Guest VM", c: "guest", d: "A third VM. If this physical server needs maintenance, the provider can live-migrate these VMs elsewhere." }
+                    ] },
+                    { t: "Hypervisor", c: "provider", d: "Provider-owned virtualization layer that partitions the server into VMs, emulates devices, and enables live migration." },
+                    { t: "Host OS + provider node agents", c: "provider", d: "Provider daemons run directly on the host CPUs: VM lifecycle, in-band hardware monitoring, and host management." },
+                    { t: "CPUs · Memory · Local NVMe", c: "hw", d: "Physical compute and local flash shared across virtual machines." }
+                ],
+                cores: [
+                    { t: "VPC networking + storage acceleration", c: "provider", d: "Even on VM hosts, modern clouds offload packet processing, encryption, and storage I/O to a DPU/IPU to save host CPU cores." }
+                ],
+                rot: [
+                    { t: "Secure card boot + card management", c: "provider", d: "Hardware root of trust and management subsystem that boots and monitors the offload card independently of the host." }
+                ],
+                bmc: [
+                    { t: "Power · sensors · hardware logs", c: "provider", d: "Out-of-band board management. On a VM host, it complements rich in-band telemetry from the host OS." }
+                ]
+            },
+            bm: {
+                owner: "dedicated to one customer",
+                host: [
+                    { t: "Customer OS (or customer's own hypervisor)", c: "customer", d: "The customer controls the entire host OS and Ring-0 kernel space. There is zero provider hypervisor overhead—and from the provider's perspective, this environment is untrusted." },
+                    { t: "CPUs · Memory · Local NVMe", c: "hw", d: "100% of host sockets, cores, caches, and hardware performance counters belong to the single tenant." }
+                ],
+                badge: "⚠ Untrusted boundary: no provider agents run on the host CPUs, and the host is isolated from internal management networks.",
+                cores: [
+                    { t: "Instance lifecycle & boot orchestration", c: "provider", moved: true, d: "Moved off the host. Starts, stops, resets, and provisions the server externally in coordination with the BMC." },
+                    { t: "Software-defined VPC networking", c: "provider", moved: true, d: "Exposes a standard PCIe network function to the host while VPC routing, firewalling, and encryption execute entirely on the card." },
+                    { t: "Cloud block storage via NVMe emulation", c: "provider", moved: true, d: "Presents remote network storage as standard PCIe NVMe drives so an unmodified customer OS can boot and run without special storage agents." },
+                    { t: "Control-plane & inventory agent", c: "provider", moved: true, d: "Communicates host state and readiness to the cloud control plane from the card—without running a single process on the host CPUs." }
+                ],
+                rot: [
+                    { t: "Secure card boot + bus isolation", c: "provider", d: "Verifies card firmware and keeps card management isolated even though the card sits in an untrusted host's PCIe slot." }
+                ],
+                bmc: [
+                    { t: "Primary source of hardware health", c: "provider", d: "ECC memory errors, thermals, voltages, fan speeds, POST progress, and firmware inventory—all gathered out-of-band via Redfish." },
+                    { t: "Cold power cycle + firmware attestation", c: "provider", d: "Enforces hard power resets and hardware-rooted firmware verification before a server is ever reused for a new tenant." }
+                ]
+            }
+        };
+        var archInfo = document.getElementById("arch-info");
+        function makeChip(item) {
+            var el = document.createElement("div");
+            el.className = "chip " + item.c + (item.moved ? " moved" : "");
+            el.textContent = item.t;
+            el.tabIndex = 0;
+            el.setAttribute("role", "button");
+            function select() {
+                document.querySelectorAll("#fig-arch .chip.selected").forEach(function (c) { c.classList.remove("selected"); });
+                el.classList.add("selected");
+                archInfo.innerHTML = "<strong>" + item.t + ":</strong> " + item.d;
+            }
+            el.addEventListener("click", select);
+            el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); } });
+            return el;
+        }
+        function fill(slotId, items) {
+            var slot = document.getElementById(slotId);
+            slot.innerHTML = "";
+            items.forEach(function (item) {
+                if (item.row) {
+                    var row = document.createElement("div");
+                    row.className = "chip-row";
+                    item.row.forEach(function (r) { row.appendChild(makeChip(r)); });
+                    slot.appendChild(row);
+                } else {
+                    slot.appendChild(makeChip(item));
+                }
+            });
+        }
+        function renderArch(mode) {
+            var a = ARCH[mode];
+            fill("slot-host", a.host);
+            fill("slot-cores", a.cores);
+            fill("slot-rot", a.rot);
+            fill("slot-bmc", a.bmc);
+            document.getElementById("host-owner").textContent = a.owner;
+            if (a.badge) {
+                var b = document.createElement("div");
+                b.className = "host-badge";
+                b.textContent = a.badge;
+                document.getElementById("slot-host").appendChild(b);
+            }
+            archInfo.innerHTML = mode === "vm"
+                ? "Provider software (green) runs on the host CPUs alongside guest VMs. Click any block to inspect its role."
+                : "Provider software moved off the host CPUs onto the offload card and BMC. Click any block to inspect its role.";
+            document.querySelectorAll("#fig-arch [data-mode]").forEach(function (btn) {
+                btn.classList.toggle("active", btn.dataset.mode === mode);
+                btn.setAttribute("aria-pressed", btn.dataset.mode === mode);
+            });
+        }
+        document.querySelectorAll("#fig-arch [data-mode]").forEach(function (btn) {
+            btn.addEventListener("click", function () { renderArch(btn.dataset.mode); });
+        });
+        renderArch("vm");
+
+        /* ---------- Figure 2: OOB telemetry ---------- */
+        var FAULTS = {
+            ecc: {
+                msgs: [
+                    ["warn", "[HOST]   DIMM memory controller logs a spike in correctable ECC errors"],
+                    ["",     "[BMC]    captures hardware event; exposes entry over Redfish"],
+                    ["",     "[OOB]    GET /redfish/v1/Systems/.../LogServices → new ECC records"],
+                    ["",     "[HEALTH] error rate exceeds threshold → classify: degrading DIMM"],
+                    ["ok",   "[REPAIR] flag server for DIMM replacement in a scheduled window"]
+                ]
+            },
+            thermal: {
+                msgs: [
+                    ["warn", "[HOST]   CPU package temperature climbing toward thermal throttle"],
+                    ["",     "[BMC]    sensor crosses warning threshold; fans ramp to 100%"],
+                    ["",     "[OOB]    Redfish Chassis/Thermal reading: CRITICAL"],
+                    ["",     "[HEALTH] correlates high temp + 0 RPM tachometer → failed fan unit"],
+                    ["ok",   "[REPAIR] alert operations & schedule hardware swap with tenant"]
+                ]
+            },
+            boot: {
+                msgs: [
+                    ["warn", "[HOST]   system hangs before OS bootloader handoff"],
+                    ["",     "[BMC]    POST code stalled; hardware FRB2/boot watchdog timer expires"],
+                    ["",     "[OOB]    Redfish event received: boot watchdog timeout + POST snapshot"],
+                    ["",     "[HEALTH] distinguishes hardware POST hang from guest OS config issue"],
+                    ["ok",   "[REPAIR] trigger OOB power reset or route unhealthy board to repair"]
+                ]
+            }
+        };
+        var stages = document.querySelectorAll("#fig-oob .stage");
+        var wires = document.querySelectorAll("#fig-oob .wire");
+        var log = document.getElementById("oob-log");
+        var cutBtn = document.getElementById("cut-btn");
+        var faultBtns = document.querySelectorAll("#fig-oob [data-fault]");
+        var cut = false, oobTimers = [];
+        function logLine(cls, text) {
+            var line = document.createElement("div");
+            if (cls) line.className = cls;
+            line.textContent = text;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+        function clearOob() {
+            oobTimers.forEach(clearTimeout);
+            oobTimers = [];
+            stages.forEach(function (s) { s.classList.remove("lit", "dark"); });
+            wires.forEach(function (w) { w.classList.remove("pulse"); });
+        }
+        function runFault(key) {
+            clearOob();
+            log.innerHTML = "";
+            faultBtns.forEach(function (b) { b.classList.toggle("active", b.dataset.fault === key); });
+            var msgs = FAULTS[key].msgs, step = reduceMotion ? 120 : 750;
+            msgs.forEach(function (m, i) {
+                oobTimers.push(setTimeout(function () {
+                    if (cut && i >= 2) {
+                        if (i === 2) {
+                            stages[2].classList.add("dark");
+                            stages[3].classList.add("dark");
+                            logLine("err", "[OOB]    Redfish scrape to BMC timed out");
+                            logLine("err", "[HEALTH] telemetry BLIND SPOT: host state unknown while OOB path is down");
+                            logLine("dim", "         → the out-of-band monitoring channel itself needs health checks");
+                        }
+                        return;
+                    }
+                    stages[i].classList.add("lit");
+                    if (i > 0) wires[i - 1].classList.add("pulse");
+                    logLine(m[0], m[1]);
+                }, i * step));
+            });
+        }
+        faultBtns.forEach(function (b) { b.addEventListener("click", function () { runFault(b.dataset.fault); }); });
+        cutBtn.addEventListener("click", function () {
+            cut = !cut;
+            cutBtn.classList.toggle("active", cut);
+            cutBtn.setAttribute("aria-pressed", cut);
+            cutBtn.textContent = cut ? "🔧 Restore OOB link" : "✂ Cut OOB link";
+            wires[1].classList.toggle("cut", cut);
+            clearOob();
+            logLine(cut ? "err" : "ok", cut ? "$ OOB link to BMC severed. Now inject a hardware fault above." : "$ OOB link restored.");
+        });
+
+        /* ---------- Figure 3: maintenance ---------- */
+        var vmToken = document.getElementById("vm-token");
+        var hostA = document.getElementById("host-a");
+        var vmState = document.getElementById("vm-state"), vmDown = document.getElementById("vm-down");
+        var vmNote = document.getElementById("vm-note");
+        var bmState = document.getElementById("bm-state"), bmDown = document.getElementById("bm-down");
+        var bmSteps = document.querySelectorAll("#bm-steps li");
+        var runBtn = document.getElementById("maint-run");
+        var maintTimers = [], downTicker = null;
+        function setState(el, text, up) { el.textContent = text; el.className = up ? "up" : "down"; }
+        function resetMaint() {
+            maintTimers.forEach(clearTimeout); maintTimers = [];
+            clearInterval(downTicker); downTicker = null;
+            vmToken.classList.remove("migrated");
+            hostA.classList.remove("updating"); hostA.textContent = "Host A";
+            setState(vmState, "RUNNING", true); vmDown.textContent = "0.0";
+            vmNote.textContent = "Live migration copies memory while the VM keeps running.";
+            setState(bmState, "RUNNING", true); bmDown.textContent = "0.0";
+            bmSteps.forEach(function (li) { li.classList.remove("current", "done"); });
+            runBtn.disabled = false;
+        }
+        function runMaint() {
+            resetMaint();
+            runBtn.disabled = true;
+            var unit = reduceMotion ? 150 : 900;
+            // VM lane: live-migrate with a sub-second switchover pause, then service Host A.
+            maintTimers.push(setTimeout(function () { vmToken.classList.add("migrated"); vmNote.textContent = "Pre-copying memory pages... VM keeps serving traffic."; }, unit * 0.5));
+            maintTimers.push(setTimeout(function () { vmDown.textContent = "0.1"; vmNote.textContent = "Brief sub-second pause during final register & dirty-page switchover."; }, unit * 2));
+            maintTimers.push(setTimeout(function () { hostA.classList.add("updating"); hostA.textContent = "Host A: servicing"; vmNote.textContent = "Host A reboots for maintenance while VM runs uninterrupted on Host B."; }, unit * 2.6));
+            maintTimers.push(setTimeout(function () { hostA.classList.remove("updating"); hostA.textContent = "Host A: healthy ✓"; }, unit * 5));
+            // Bare metal lane: scheduled window; downtime runs while host is offline.
+            var down = 0;
+            bmSteps.forEach(function (li, i) {
+                maintTimers.push(setTimeout(function () {
+                    if (i > 0) { bmSteps[i - 1].classList.remove("current"); bmSteps[i - 1].classList.add("done"); }
+                    li.classList.add("current");
+                    if (i === 2) {
+                        setState(bmState, "OFFLINE", false);
+                        downTicker = setInterval(function () { down += 0.1 * 30; bmDown.textContent = down.toFixed(1); }, 100);
+                    }
+                    if (i === bmSteps.length - 1) {
+                        clearInterval(downTicker);
+                        setState(bmState, "RUNNING", true);
+                        li.classList.remove("current"); li.classList.add("done");
+                        runBtn.disabled = false;
+                    }
+                }, i * unit));
+            });
+        }
+        runBtn.addEventListener("click", runMaint);
+        document.getElementById("maint-reset").addEventListener("click", resetMaint);
+
+        /* ---------- Figure 4: fungible-fleet & between-tenant lifecycle ---------- */
+        var LIFE = [
+            ["vmfleet",   "Virtualized host mode", "The server boots the provider's verified host OS and hypervisor, hosting multi-tenant VMs as part of the standard virtualized fleet."],
+            ["repurpose", "Capacity shifts to bare metal", "Guest VMs are live-migrated or drained, local flash is scrubbed, and the offload card + BMC seal off internal management networks so the host CPUs can safely run untrusted code."],
+            ["ready",     "Ready in the bare metal pool", "Hardware health is green, local media is clean, and all BIOS, BMC, and offload-card firmware hashes match signed golden measurements."],
+            ["serving",   "Customer launches a bare metal instance", "The offload card attaches isolated VPC networking and NVMe boot/data volumes; the host boots the customer's OS or hypervisor with 100% of the physical cores."],
+            ["cycle",     "Customer deletes the instance → cold power cycle", "The BMC cuts main power, clearing volatile DRAM, CPU caches, and PCIe device registers."],
+            ["scrub",     "Storage & NVRAM sanitization", "Local NVMe SSDs undergo cryptographic key erasure/wipe and UEFI/BIOS configuration variables are reset to known-clean defaults."],
+            ["attest",    "Cryptographic firmware attestation", "A hardware root of trust measures BIOS, BMC, and adapter firmware to prove nothing was modified while untrusted Ring-0 code ran. (If any check fails, automation quarantines the machine to repair.)", false],
+            ["ready",     "Reuse for the next bare metal tenant (↗)", "Once attested, the clean server can loop straight back into the bare metal pool—repeating Serve → Power cycle → Sanitize → Attest across tenants."],
+            ["reinstall", "Returning to the virtualized fleet → automated reinstall", "Because an untrusted OS owned local disks, rejoining the VM fleet requires unattended OOB re-imaging: network-boot a signed provisioning kernel, write a fresh verified provider host OS + hypervisor image to disk, and check measured-boot PCRs."],
+            ["vmfleet",   "Reinstall verified → back in virtualized fleet", "With a freshly imaged, measured-boot-verified provider OS running on attested hardware, the server safely hosts multi-tenant VMs again. Full circle!"]
+        ];
+        var lifeIdx = -1, lifeAuto = null;
+        var lifeText = document.getElementById("life-text");
+        var autoBtn = document.getElementById("life-auto");
+        function showLife(i) {
+            var warn = !!LIFE[i][3];
+            document.querySelectorAll("#fig-life .state").forEach(function (s) {
+                var match = s.dataset.state === LIFE[i][0];
+                s.classList.toggle("active", match && !warn);
+                s.classList.toggle("warn", match && warn);
+            });
+            lifeText.innerHTML = "<span class='evt'>Step " + (i + 1) + "/" + LIFE.length + " — " + LIFE[i][1] + ":</span> " + LIFE[i][2];
+        }
+        function nextLife() { lifeIdx = (lifeIdx + 1) % LIFE.length; showLife(lifeIdx); }
+        function stopAuto() { clearInterval(lifeAuto); lifeAuto = null; autoBtn.classList.remove("active"); autoBtn.textContent = "Auto-play"; }
+        document.getElementById("life-next").addEventListener("click", function () { stopAuto(); nextLife(); });
+        autoBtn.addEventListener("click", function () {
+            if (lifeAuto) { stopAuto(); return; }
+            autoBtn.classList.add("active"); autoBtn.textContent = "Pause";
+            nextLife();
+            lifeAuto = setInterval(nextLife, 3200);
+        });
+        document.getElementById("life-reset").addEventListener("click", function () {
+            stopAuto(); lifeIdx = -1;
+            document.querySelectorAll("#fig-life .state").forEach(function (s) { s.classList.remove("active", "warn"); });
+            lifeText.innerHTML = "Press <b>Next event</b> to walk a server through its fungible-fleet lifecycle.";
+        });
+
+        /* ---------- Fun cards: tap to flip on touch screens ---------- */
+        document.querySelectorAll(".fun-card").forEach(function (card) {
+            card.addEventListener("click", function () { card.classList.toggle("flipped"); });
+        });
+    })();
+    </script>
+</body>
+</html>
