@@ -337,50 +337,11 @@ ul, ol {
     margin-right: 5px;
 }
 
-/* =========================================
-   BROKEN ANDA (Personal Blog)
-   ========================================= */
-.broken-anda-bg {
-    background-color: #fdfbf7; /* Warm, off-white/cream */
-}
-
-.serif-title {
-    font-family: 'Georgia', serif;
-    color: #4a3b32;
-}
-
-.featured-post {
-    background: #fff;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    margin-bottom: 40px;
-    text-align: center;
-}
-
-/* CSS Column-based Masonry for articles */
-.masonry-grid {
-    column-count: 2;
-    column-gap: 20px;
-}
-
 @media (max-width: 768px) {
-    .masonry-grid {
-        column-count: 1;
-    }
     .tech-post {
         flex-direction: column;
         align-items: flex-start;
     }
-}
-
-.masonry-item {
-    break-inside: avoid;
-    background: #fff;
-    padding: 25px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 /* The way to highlight the active page */
@@ -522,4 +483,3 @@ ul, ol {
   -webkit-user-select: all;
   user-select: all; 
 }
-

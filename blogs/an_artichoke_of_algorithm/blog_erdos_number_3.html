@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three Hops to Paul Erdős: My Erdős Number Is 3 - Arghya Bhattacharya</title>
+    <meta name="description" content="Tracing my three-hop co-authorship path to Paul Erdős (Erdős number 3) through Michael A. Bender and Michael E. Saks, verified via AMS MathSciNet.">
+    <!-- This page lives in blogs/an_artichoke_of_algorithm/, so every top-level asset needs ../../ -->
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="icon" type="image/jpg" href="../../images/artichoke.jpg">
+
+    <style>
+        /* ---------- Article header: dark banner, distinct from the light Blogs landing header ---------- */
+        .post-header {
+            position: relative;
+            margin: 0 0 32px 0;
+            padding: 28px 32px 32px 32px;
+            border-radius: 16px;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(23, 43, 77, 0.95), rgba(66, 133, 244, 0.88));
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .post-breadcrumb {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 18px;
+        }
+        .post-breadcrumb a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .post-tag {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.18);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .post-header h1 {
+            margin: 0 0 12px 0;
+            font-size: 32px;
+            line-height: 1.25;
+            color: #fff;
+        }
+        .post-meta {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* ---------- Back button ---------- */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #4285F4;
+            border-radius: 20px;
+            color: #4285F4;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .back-button:hover,
+        .back-button:focus {
+            background-color: #4285F4;
+            color: #fff;
+        }
+        .post-header .back-button {
+            margin-bottom: 18px;
+            border-color: #fff;
+            color: #fff;
+            background: transparent;
+        }
+        .post-header .back-button:hover,
+        .post-header .back-button:focus {
+            background: #fff;
+            color: #172b4d;
+        }
+
+        /* ---------- Article body ---------- */
+        .blog-post {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .blog-post p,
+        .blog-post li {
+            line-height: 1.7;
+        }
+        .blog-post ul {
+            list-style-type: square;
+        }
+        .blog-post li {
+            margin-bottom: 12px;
+        }
+        .post-footer {
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* ---------- Collaboration Graph Widget ---------- */
+        .erdos-chain-card {
+            margin: 28px 0;
+            padding: 22px 16px;
+            background: linear-gradient(180deg, #f8fafd 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+        .erdos-chain-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #475569;
+            margin: 0 0 18px 0;
+            text-align: center;
+        }
+        .erdos-nodes {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        .erdos-node {
+            flex: 1 1 0;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fff;
+            border: 1.5px solid #cbd5e1;
+            border-top: 4px solid #64748b;
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .erdos-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+        .erdos-node.highlight-me {
+            border-color: #93c5fd;
+            border-top: 4px solid #2563eb;
+            background: linear-gradient(180deg, #eff6ff 0%, #ffffff 45%);
+        }
+        .erdos-node.highlight-erdos {
+            border-color: #fcd34d;
+            border-top: 4px solid #d97706;
+            background: linear-gradient(180deg, #fffbeb 0%, #ffffff 45%);
+        }
+        .erdos-badge-num {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        .erdos-node.highlight-me .erdos-badge-num {
+            background: #2563eb;
+            color: #fff;
+        }
+        .erdos-node.highlight-erdos .erdos-badge-num {
+            background: #d97706;
+            color: #fff;
+        }
+        .erdos-node-name {
+            font-weight: 700;
+            font-size: 14.5px;
+            line-height: 1.25;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+        .erdos-node-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            margin-top: auto;
+        }
+        .erdos-meta-badge {
+            display: block;
+            font-size: 11px;
+            line-height: 1.35;
+            font-weight: 600;
+            padding: 5px 7px;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .erdos-meta-badge.badge-edu {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+        .erdos-meta-badge.badge-role {
+            background: #eef2ff;
+            color: #1e40af;
+            border: 1px solid #dbeafe;
+        }
+        .erdos-meta-badge.badge-gold {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .erdos-edge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10.5px;
+            color: #475569;
+            padding: 0 2px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .erdos-edge-arrow {
+            font-size: 18px;
+            line-height: 1.1;
+            color: #2563eb;
+            font-weight: bold;
+        }
+        .erdos-edge-label {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .erdos-edge-mr {
+            font-size: 10px;
+            color: #64748b;
+            font-family: monospace;
+        }
+
+        /* ---------- Multipartite Subgraph Image + Code Drawer ---------- */
+        .subgraph-card {
+            margin: 24px 0;
+            padding: 18px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+            text-align: center;
+        }
+        .subgraph-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+        }
+        .subgraph-caption {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #64748b;
+            text-align: center;
+        }
+        .code-drawer {
+            margin: 18px 0 28px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: #0f172a;
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+        .code-drawer summary {
+            cursor: pointer;
+            padding: 12px 18px;
+            background: #1e293b;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            list-style: none;
+        }
+        .code-drawer summary::-webkit-details-marker {
+            display: none;
+        }
+        .code-drawer summary:hover {
+            background: #334155;
+        }
+        .code-drawer-hint {
+            font-size: 12px;
+            font-weight: 500;
+            color: #93c5fd;
+        }
+        .code-drawer pre {
+            margin: 0;
+            padding: 18px;
+            overflow-x: auto;
+            font-size: 12.5px;
+            line-height: 1.55;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            color: #e2e8f0;
+        }
+
+        /* ---------- MathSciNet Verification Box ---------- */
+        .mathscinet-card {
+            margin: 28px 0;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .mathscinet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 14px 20px;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .mathscinet-header-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #c2410c;
+        }
+        .mathscinet-verify-link {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .mathscinet-verify-link:hover {
+            text-decoration: underline;
+        }
+        .mathscinet-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .mathscinet-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .mathscinet-table tr:last-child td {
+            border-bottom: none;
+        }
+        .mathscinet-author {
+            color: #1d4ed8;
+            font-weight: 500;
+        }
+        .mathscinet-rel {
+            color: #4b5563;
+            text-align: center;
+        }
+        .mathscinet-mr {
+            text-align: right;
+            font-weight: 600;
+        }
+        .mathscinet-mr a {
+            color: #1d4ed8;
+            text-decoration: none;
+        }
+        .mathscinet-mr a:hover {
+            text-decoration: underline;
+        }
+        .mathscinet-mr .mr-prefix {
+            color: #c2410c;
+            font-weight: 700;
+        }
+
+        @media (max-width: 700px) {
+            .erdos-nodes {
+                flex-direction: column;
+                align-items: center;
+            }
+            .erdos-node {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .erdos-edge {
+                padding: 6px 0;
+            }
+            .erdos-edge-arrow {
+                transform: rotate(90deg);
+            }
+            .mathscinet-table td {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            .post-header { padding: 20px; }
+            .post-header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="../../index.html">Home</a>
+    <a href="../../experience.html">Work Experience</a>
+    <a href="../../publications.html">Publications &amp; Talks</a>
+    <a href="../../blogs.html" class="active">Blogs &amp; About</a>
+</nav>
+
+<main>
+    <article class="blog-post">
+        <header class="post-header">
+            <a href="../../an_artichoke_of_algorithm.html" class="back-button">&larr; Back to An Artichoke of Algorithm</a>
+            <div class="post-breadcrumb"><a href="../../an_artichoke_of_algorithm.html">An Artichoke of Algorithm</a></div>
+            <span class="post-tag">Mathematics &middot; Algorithms</span>
+            <h1>Three Hops to Paul Erdős: My Erdős Number Is 3</h1>
+            <div class="post-meta">Arghya Bhattacharya &middot; November 2026 &middot; Seattle, WA &middot; <span id="read-time">3</span> min read</div>
+        </header>
+
+        <p>If you are familiar with pop culture, you have probably heard of the "Six Degrees of Kevin Bacon"—the parlor game built on the idea that any actor can be linked to Kevin Bacon through shared film roles in six steps or fewer. Long before Hollywood had Bacon numbers, the mathematical and scientific communities had their own, much older version: the <b>Erdős number</b>, one of my favorite pieces of academic folklore.</p>
+
+        <h2>Who Was Paul Erdős?</h2>
+        <p><b>Paul Erdős</b> (1913–1996) was a brilliant, eccentric, and extraordinarily prolific Hungarian mathematician of the 20th century. Living out of a single suitcase as an itinerant scholar ("my brain is open!"), he published more than 1,500 papers with <b>511 direct collaborators</b> across combinatorics, graph theory, classical analysis, and number theory. Among his landmark contributions:</p>
+
+        <ul>
+            <li><b>The Probabilistic Method:</b> Erdős pioneered proving the deterministic existence of combinatorial structures by showing that a random construction satisfies the desired property with strictly positive probability—famously establishing the exponential lower bound <i>R</i>(<i>k</i>, <i>k</i>) &gt; 2<sup><i>k</i>/2</sup> for diagonal Ramsey numbers (1947).</li>
+            <li><b>The Elementary Proof of the Prime Number Theorem:</b> Alongside Atle Selberg (1949), he gave the first elementary proof of the asymptotic distribution of primes, &pi;(<i>x</i>) &sim; <i>x</i> / ln <i>x</i>, using real-variable techniques and Selberg's symmetry formula without invoking the complex-analytic contour integration of the Riemann zeta function &zeta;(<i>s</i>).</li>
+            <li><b>The Erdős–Kac Theorem:</b> A foundational theorem in probabilistic number theory (1940) establishing that &omega;(<i>n</i>), the number of distinct prime factors of an integer <i>n</i>, obeys a standard normal law: as <i>x</i> &rarr; &infin;, the natural density of integers <i>n</i> &le; <i>x</i> satisfying (&omega;(<i>n</i>) &minus; ln ln <i>n</i>) / &radic;(ln ln <i>n</i>) &le; <i>z</i> converges to the standard Gaussian distribution &Phi;(<i>z</i>).</li>
+        </ul>
+
+        <h2>How the Erdős Number Works (The Shortest-Path Rule)</h2>
+        <p>In the language of graph theory, the scientific community forms a massive undirected co-authorship graph where researchers are vertices and joint papers are edges:</p>
+        <ul>
+            <li><b>Paul Erdős</b> himself has an Erdős number of <b>0</b>.</li>
+            <li>Anyone who co-authored a paper directly with Erdős has an Erdős number of <b>1</b> (all 511 of them).</li>
+            <li>Anyone who co-authored a paper with someone at distance 1 (without co-authoring with Erdős directly) has an Erdős number of <b>2</b>, and so on (or &infin; if no path exists).</li>
+        </ul>
+        <p>Because researchers collaborate widely, it is common to have multiple paths back to Erdős. Formally, your Erdős number is strictly the <b>shortest-path distance</b> in the co-authorship graph: if you co-author a paper with someone who has an Erdős number of 4 and also with someone who has an Erdős number of 2, you inherit the minimum plus one—giving you an Erdős number of <b>3</b>.</p>
+
+        <h2>Finding My Erdős Number</h2>
+        <p>I am fortunate to have worked alongside brilliant researchers—including Helen Xu, Rezaul A. Chowdhury, and my doctoral advisor, Michael A. Bender—who connected me to this mathematical lineage. While registering for the internal Erdős number badge at Google recently, I looked up my shortest co-authorship path on the American Mathematical Society's <a href="https://mathscinet.ams.org/mathscinet/freetools/collab-dist?source=1525986&amp;target=189017" target="_blank">MathSciNet Collaboration Distance</a> tool and confirmed that <b>my Erdős number is 3!</b></p>
+
+        <div class="erdos-chain-card">
+            <div class="erdos-chain-title">Shortest Co-Authorship Path (Distance = 3)</div>
+            <div class="erdos-nodes">
+                <div class="erdos-node highlight-me">
+                    <span class="erdos-badge-num">Erdős #3</span>
+                    <div class="erdos-node-name">Arghya Bhattacharya</div>
+                    <div class="erdos-node-badges">
+                        <span class="erdos-meta-badge badge-edu">Ph.D. from Stony Brook</span>
+                        <span class="erdos-meta-badge badge-role">Senior SWE at Google</span>
+                    </div>
+                </div>
+                <div class="erdos-edge">
+                    <span class="erdos-edge-label">ESA '22</span>
+                    <span class="erdos-edge-arrow">&harr;</span>
+                    <span class="erdos-edge-mr">MR4481759</span>
+                </div>
+                <div class="erdos-node">
+                    <span class="erdos-badge-num">Erdős #2</span>
+                    <div class="erdos-node-name">Michael A. Bender</div>
+                    <div class="erdos-node-badges">
+                        <span class="erdos-meta-badge badge-edu">Ph.D. from Harvard</span>
+                        <span class="erdos-meta-badge badge-role">John L. Hennessy Endowed Professor of Stony Brook CS</span>
+                    </div>
+                </div>
+                <div class="erdos-edge">
+                    <span class="erdos-edge-label">FOCS '24</span>
+                    <span class="erdos-edge-arrow">&harr;</span>
+                    <span class="erdos-edge-mr">MR4849329</span>
+                </div>
+                <div class="erdos-node">
+                    <span class="erdos-badge-num">Erdős #1</span>
+                    <div class="erdos-node-name">Michael E. Saks</div>
+                    <div class="erdos-node-badges">
+                        <span class="erdos-meta-badge badge-edu">Ph.D. from MIT</span>
+                        <span class="erdos-meta-badge badge-role">Distinguished Professor of Rutgers Maths</span>
+                    </div>
+                </div>
+                <div class="erdos-edge">
+                    <span class="erdos-edge-label">JCTB '86</span>
+                    <span class="erdos-edge-arrow">&harr;</span>
+                    <span class="erdos-edge-mr">MR0854604</span>
+                </div>
+                <div class="erdos-node highlight-erdos">
+                    <span class="erdos-badge-num">Erdős #0</span>
+                    <div class="erdos-node-name">Paul Erdős</div>
+                    <div class="erdos-node-badges">
+                        <span class="erdos-meta-badge badge-edu">1913–1996</span>
+                        <span class="erdos-meta-badge badge-gold">Wolf Prize Laureate &middot; 1,500+ Papers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>The Three Papers in the Chain</h2>
+        <p>Every edge in the MathSciNet collaboration graph corresponds to an indexed publication:</p>
+
+        <ul>
+            <li>
+                <b>Hop 1 (Arghya Bhattacharya &harr; Michael A. Bender, <a href="https://mathscinet.ams.org/mathscinet/article?mr=4481759" target="_blank">MR4481759</a>):</b><br>
+                <b>Arghya Bhattacharya</b>, Helen Xu, Abiyaz Chowdhury, Rezaul A. Chowdhury, Rathish Das, Rob Johnson, and <b>Michael A. Bender</b>. <a href="https://drops.dagstuhl.de/opus/volltexte/2022/16954/" target="_blank"><i>When Are Cache-Oblivious Algorithms Cache Adaptive? A Case Study of Matrix Multiplication and Sorting</i></a>. <i>30th Annual European Symposium on Algorithms (ESA 2022)</i>, LIPIcs Vol. 244, pp. 16:1–16:17.<br>
+                This was a core chapter of my Ph.D. thesis at Stony Brook with my advisor, <a href="https://www3.cs.stonybrook.edu/~bender/" target="_blank">Prof. Michael A. Bender</a>, studying how cache-oblivious divide-and-conquer algorithms behave when the available memory fluctuates dynamically.
+            </li>
+            <li>
+                <b>Hop 2 (Michael A. Bender &harr; Michael Ezra Saks, <a href="https://mathscinet.ams.org/mathscinet/article?mr=4849329" target="_blank">MR4849329</a>):</b><br>
+                <b>Michael A. Bender</b>, Alex Conway, Martín Farach-Colton, Hanna Komlós, Michal Koucký, William Kuszmaul, and <b>Michael E. Saks</b>. <a href="https://arxiv.org/abs/2405.00807" target="_blank"><i>Nearly Optimal List Labeling</i></a>. <i>Proceedings of the IEEE 65th Annual Symposium on Foundations of Computer Science (FOCS 2024)</i>, pp. 2253–2274.<br>
+                Fittingly, this paper studies the online list-labeling (packed-memory array) problem—a classic data-structure question that I also explored in my own <a href="../../blogs.html#articles-for-fun">expository notes on Packed Memory Arrays</a> during graduate school.
+            </li>
+            <li>
+                <b>Hop 3 (Michael Ezra Saks &harr; Paul Erdős, <a href="https://mathscinet.ams.org/mathscinet/article?mr=0854604" target="_blank">MR0854604</a>):</b><br>
+                <b>Paul Erdős</b>, <b>Michael Saks</b>, and Vera T. Sós. <a href="https://doi.org/10.1016/0095-8956(86)90028-6" target="_blank"><i>Maximum induced trees in graphs</i></a>. <i>Journal of Combinatorial Theory, Series B</i>, Vol. 41, Issue 1 (1986), pp. 61–79.<br>
+                In this 1986 paper, Erdős, Saks, and Sós studied the maximum size of a vertex subset in a graph that induces a tree, proving tight extremal bounds in terms of graph invariants and showing that the corresponding decision problem is NP-complete.
+            </li>
+        </ul>
+
+        <div class="mathscinet-card">
+            <div class="mathscinet-header">
+                <span class="mathscinet-header-title">AMS MathSciNet &middot; MR Collaboration Distance = 3</span>
+                <a class="mathscinet-verify-link" href="https://mathscinet.ams.org/mathscinet/freetools/collab-dist?source=1525986&amp;target=189017" target="_blank">Verify on MathSciNet (1525986 &rarr; 189017) &nearr;</a>
+            </div>
+            <table class="mathscinet-table">
+                <tbody>
+                    <tr>
+                        <td class="mathscinet-author">Bhattacharya, Arghya</td>
+                        <td class="mathscinet-rel">coauthored with</td>
+                        <td class="mathscinet-author">Bender, Michael A.</td>
+                        <td class="mathscinet-mr"><a href="https://mathscinet.ams.org/mathscinet/article?mr=4481759" target="_blank"><span class="mr-prefix">MR</span>4481759</a></td>
+                    </tr>
+                    <tr>
+                        <td class="mathscinet-author">Bender, Michael A.</td>
+                        <td class="mathscinet-rel">coauthored with</td>
+                        <td class="mathscinet-author">Saks, Michael Ezra</td>
+                        <td class="mathscinet-mr"><a href="https://mathscinet.ams.org/mathscinet/article?mr=4849329" target="_blank"><span class="mr-prefix">MR</span>4849329</a></td>
+                    </tr>
+                    <tr>
+                        <td class="mathscinet-author">Saks, Michael Ezra</td>
+                        <td class="mathscinet-rel">coauthored with</td>
+                        <td class="mathscinet-author">Erdős, Paul<sup>1</sup></td>
+                        <td class="mathscinet-mr"><a href="https://mathscinet.ams.org/mathscinet/article?mr=0854604" target="_blank"><span class="mr-prefix">MR</span>0854604</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>What I appreciate most about this three-hop chain is the technical thread connecting pure combinatorics, theoretical computer science, and modern computer systems. Erdős and Saks (1986) used extremal arguments to bound tree structures and prove hardness results in abstract graphs. Bender and Saks (2024) brought combinatorial tree hierarchies into contiguous memory—using an implicit recursive tree over array sub-intervals in a Packed Memory Array to maintain sorted order with <i>O</i>(log<sup>3/2</sup> <i>n</i>) amortized element moves, bypassing the classic &Omega;(log<sup>2</sup> <i>n</i>) deterministic lower bound that Saks himself co-proved. Finally, our ESA 2022 work with Bender takes those same locality-preserving recursive tree decompositions and asks how their I/O transfers behave on real multi-tenant machines where the physical cache and RAM available to a process fluctuate over time.</p>
+
+        <h2>Visualizing Multiple Paths in the Collaboration Graph</h2>
+        <p>Interestingly, once you start looking at the co-authorship graph, there are often multiple paths to Paul Erdős of the same cost (or slightly higher cost) running through different co-authors and advisors. Here is a simple Python script using <code>networkx</code> and <code>matplotlib</code> to layer and visualize the broader collaboration neighborhood after you find your Erdős path:</p>
+
+        <figure class="subgraph-card">
+            <img src="../images/erdos_path.png" onerror="this.onerror=null;this.src='../images/erdos_path.jpg';" alt="Multipartite co-authorship graph showing paths to Paul Erdős">
+            <figcaption class="subgraph-caption">Multipartite co-authorship graph generated with <code>networkx</code>.</figcaption>
+        </figure>
+
+        <details class="code-drawer">
+            <summary>
+                <span>Python Script: <code>generate_erdos_graph.py</code> (NetworkX + Matplotlib)</span>
+                <span class="code-drawer-hint">Click to expand / collapse &darr;</span>
+            </summary>
+<pre><code>import networkx as nx
+import matplotlib.pyplot as plt
+
+def generate_erdos_graph():
+    # 1. Create a new undirected graph
+    G = nx.Graph()
+
+    # 2. Define the edges based on all the collaborations
+    edges = [
+        # Your path via Bender (Length 3)
+        ("Paul Erdős", "Michael E. Saks"),
+        ("Michael E. Saks", "Michael A. Bender"),
+        ("Michael A. Bender", "Arghya Bhattacharya"),
+        
+        # Rezaul's Path 1 via Thorup (Length 3)
+        ("Paul Erdős", "Peter Winkler"),
+        ("Peter Winkler", "Mikkel Thorup"),
+        ("Mikkel Thorup", "Rezaul A. Chowdhury"),
+        
+        # Rezaul's Path 2 via Szegedy (Length 3)
+        ("Paul Erdős", "Márió Szegedy"),
+        ("Márió Szegedy", "Phillip Gibbons"),
+        ("Phillip Gibbons", "Rezaul A. Chowdhury"),
+        
+        # Rezaul's Path 3 via Mitchell (Length 3)
+        ("Paul Erdős", "Craig Tovey"),
+        ("Craig Tovey", "Joseph Mitchell"),
+        ("Joseph Mitchell", "Rezaul A. Chowdhury"),
+        
+        # Cross connections
+        ("Rezaul A. Chowdhury", "Michael A. Bender"),
+        ("Arghya Bhattacharya", "Rezaul A. Chowdhury"),
+
+        ("Michael A. Bender", "Helen Xu"),
+        ("Rezaul A. Chowdhury", "Helen Xu"),
+        ("Arghya Bhattacharya", "Helen Xu")
+    ]
+    
+    G.add_edges_from(edges)
+
+    # 3. Assign nodes to "layers" based on their shortest distance to Paul Erdős
+    # This keeps the graph organized left-to-right
+    for node in G.nodes():
+        try:
+            # Calculate shortest path length to Erdős
+            distance = nx.shortest_path_length(G, source="Paul Erdős", target=node)
+            G.nodes[node]["layer"] = distance
+        except nx.NetworkXNoPath:
+            G.nodes[node]["layer"] = 5 # Fallback
+
+    # 4. Setup the visual layout
+    plt.figure(figsize=(16, 10))
+    
+    # Use multipartite layout to arrange nodes by their 'layer' attribute
+    pos = nx.multipartite_layout(G, subset_key="layer", align="horizontal")
+    
+    # 5. Configure visual styling
+    # Highlight the primary shortest path (Erdős -> Saks -> Bender -> Arghya)
+    primary_path = [("Paul Erdős", "Michael E. Saks"), ("Michael E. Saks", "Michael A. Bender"), ("Michael A. Bender", "Arghya Bhattacharya")]
+    
+    # Draw all edges in a light gray/blue first
+    nx.draw_networkx_edges(G, pos, edge_color='#cccccc', width=2)
+    
+    # Draw the primary shortest path bolder and in a different color
+    nx.draw_networkx_edges(G, pos, edgelist=primary_path, edge_color='#ff9f1c', width=4)
+    
+    # Draw the nodes
+    nx.draw_networkx_nodes(
+        G, pos, 
+        node_size=7000, 
+        node_color='#e0fbfc', 
+        edgecolors='#3d5a80', 
+        linewidths=3
+    )
+    
+    # Customize label appearance. We'll split long names into two lines for readability.
+    labels = {node: node.replace(" ", "\n") for node in G.nodes()}
+    nx.draw_networkx_labels(
+        G, pos, 
+        labels=labels,
+        font_size=14, 
+        font_family='sans-serif', 
+        font_weight='bold',
+        font_color='#293241'
+    )
+
+    # 6. Clean up the plot and save
+    plt.axis('off')
+    plt.title("My Erdős number is 3!", fontsize=22, fontweight='bold', pad=30)
+    plt.tight_layout()
+
+    filename = "erdos_path.png"
+    plt.savefig(filename, format="PNG", dpi=300, bbox_inches="tight")
+    print(f"Graph image successfully generated and saved as '{filename}'")
+
+if __name__ == "__main__":
+    generate_erdos_graph()</code></pre>
+        </details>
+
+        <h2>Why It Matters: A Small-World Network of Science</h2>
+        <p>The Erdős collaboration graph is one of the classic real-world examples of a <b>small-world network</b>, illustrating how closely connected human knowledge and scientific discovery really are—even across mathematics, computer science, physics, and biology. More than a piece of academic trivia, it is a reminder that science is not built by solitary geniuses working in isolation, but by a continuously growing web of collaboration. It is a fun privilege to be woven into that fabric just three steps away from Paul Erdős.</p>
+
+        <footer class="post-footer">
+            <a href="../../an_artichoke_of_algorithm.html" class="back-button">&larr; Back to An Artichoke of Algorithm</a>
+        </footer>
+    </article>
+</main>
+
+<script>
+(function () {
+    "use strict";
+    var words = document.querySelector(".blog-post").innerText.split(/\s+/).length;
+    document.getElementById("read-time").textContent = Math.max(1, Math.round(words / 400));
+})();
+</script>
+</body>
+</html>

@@ -5,6 +5,223 @@
     <title>Blogs & About - Arghya Bhattacharya</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/jpg" href="images/ab_convocation.jpg">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Subtle clickable '#' anchor on section headings */
+        h2[id] {
+            scroll-margin-top: 24px;
+        }
+        h2[id] .section-anchor {
+            margin-left: 8px;
+            color: #9aa0a6;
+            text-decoration: none;
+            font-weight: 400;
+            opacity: 0;
+            transition: opacity 0.15s ease, color 0.15s ease;
+        }
+        h2[id]:hover .section-anchor,
+        h2[id] .section-anchor:focus {
+            opacity: 1;
+        }
+        h2[id] .section-anchor:hover {
+            color: #4285F4;
+        }
+
+        /* Blog Post Cards */
+        .blog-card {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            margin: 0 0 24px 0;
+            padding: 16px;
+            background: #fff;
+            border-radius: 12px;
+            border-left: 4px solid #4285F4;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            color: inherit;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .blog-card:hover,
+        .blog-card:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+        }
+        .blog-card-thumb {
+            flex: 0 0 160px;
+            height: 160px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .blog-card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 55%;
+        }
+        .blog-card-body {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .blog-card-body h3 {
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .blog-card-date {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .blog-card-excerpt {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #444;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .blog-card-more {
+            margin-top: auto;
+            padding-top: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4285F4;
+        }
+
+        /* Horizontal Featured Blog Badge (An Artichoke of Algorithm) */
+        .featured-blog-badge {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            padding: 24px 28px;
+            margin: 16px 0 20px 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafd 100%);
+            border: 1px solid #e3e8ef;
+            border-left: 5px solid #2e7d32;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .featured-blog-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.10);
+        }
+        .featured-blog-thumb {
+            flex: 0 0 180px;
+            height: 135px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .featured-blog-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .featured-blog-content {
+            flex: 1;
+            min-width: 0;
+            text-align: left;
+        }
+        .featured-blog-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 3px 10px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+        .featured-blog-content h3 {
+            margin: 0 0 4px 0;
+            font-size: 22px;
+            color: #1f2937;
+        }
+        .featured-blog-tagline {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-style: italic;
+            color: #5f6368;
+        }
+        .featured-blog-desc {
+            margin: 0;
+            font-size: 14.5px;
+            line-height: 1.55;
+            color: #374151;
+        }
+        .featured-blog-action {
+            flex-shrink: 0;
+        }
+        .featured-blog-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 11px 20px;
+            background: #1f2937;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            white-space: nowrap;
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+        .featured-blog-btn:hover {
+            background: #2e7d32;
+            transform: translateX(2px);
+        }
+        .medium-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 12px 0 36px 0;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .medium-note a {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 680px) {
+            .blog-card { flex-direction: column; }
+            .blog-card-thumb { flex-basis: auto; width: 100%; height: 200px; }
+            .featured-blog-badge {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 20px;
+            }
+            .featured-blog-thumb {
+                flex-basis: auto;
+                width: 100%;
+                height: 180px;
+            }
+            .featured-blog-action {
+                width: 100%;
+            }
+            .featured-blog-btn {
+                justify-content: center;
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -16,88 +233,11 @@
 </nav>
 
 <main>
-<h2>About Me</h2>
+<h2 id="about-me">About Me<a class="section-anchor" href="#about-me" aria-label="Link to About Me section">#</a></h2>
 <p>I stay in Seattle, WA, USA. I spent around 6 years in the beautiful Long Island, NY, USA. I grew up in the village Mourigram, Howrah, WB, India. Feel free to connect with me on social media. 
     <a href="https://www.facebook.com/i.am.arghya.bhattacharya/"><img src="images/facebook.png" alt="Facebook" width="30" height="30"></a> 
     <a href="https://www.instagram.com/arghya_the_explorer/"><img src="images/instagram.png" alt="Instagram" width="30" height="30"></a>
 </p>
-<p>Read my former blog on Medium. In this blog, I share my thoughts and opinions on several social, technical, and political issues. 
-    <a href="https://medium.com/@arghyab"><img src="images/medium.png" alt="Medium" width="30" height="20"></a>
-</p>
-
-<!--
-  STEP 1: paste this <style> block inside <head> of blogs.html (after style.css).
--->
-<style>
-    .blog-card {
-        display: flex;
-        gap: 20px;
-        align-items: stretch;
-        margin: 0 0 24px 0;
-        padding: 16px;
-        background: #fff;
-        border-radius: 12px;
-        border-left: 4px solid #4285F4;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        color: inherit;
-        text-decoration: none;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .blog-card:hover,
-    .blog-card:focus {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.10);
-    }
-    .blog-card-thumb {
-        flex: 0 0 160px;
-        height: 160px;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .blog-card-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center 55%; /* centers on the people, not the ceiling */
-    }
-    .blog-card-body {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-    }
-    .blog-card-body h3 {
-        margin: 0 0 4px 0;
-        font-size: 18px;
-        color: #333;
-    }
-    .blog-card-date {
-        font-size: 13px;
-        color: #666;
-        margin-bottom: 8px;
-    }
-    .blog-card-excerpt {
-        margin: 0;
-        font-size: 14px;
-        line-height: 1.6;
-        color: #444;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    .blog-card-more {
-        margin-top: auto;
-        padding-top: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        color: #4285F4;
-    }
-    @media (max-width: 600px) {
-        .blog-card { flex-direction: column; }
-        .blog-card-thumb { flex-basis: auto; width: 100%; height: 200px; }
-    }
-</style>
-
 
 <a class="blog-card" href="blogs/blog_phd_intern_2026.html">
     <div class="blog-card-thumb">
@@ -123,33 +263,30 @@
     </div>
 </a>
 
+<h2 id="my-blogs">My Blogs<a class="section-anchor" href="#my-blogs" aria-label="Link to My Blogs section">#</a></h2>
+<p>I write about algorithms, data structures, distributed systems, and the engineering behind modern computing infrastructure in my technical blog, <strong>An Artichoke of Algorithm</strong>.</p>
 
-
-<div style="text-align: center; margin-bottom: 40px;">
-    <h2>My Blogs</h2>
-    <p>I write about algorithms, systems, and the everyday layers of life. I maintain 2 blogs: The Broken Anda (Eggs) and An Artichoke of Algorithm.</p>
+<div class="featured-blog-badge">
+    <div class="featured-blog-thumb">
+        <img src="images/artichoke.jpg" alt="An Artichoke of Algorithm">
+    </div>
+    <div class="featured-blog-content">
+        <span class="featured-blog-eyebrow">Technical Blog</span>
+        <h3>An Artichoke of Algorithm</h3>
+        <p class="featured-blog-tagline">Peeling back the layers of Computer Science.</p>
+        <p class="featured-blog-desc">Deep dives into algorithm engineering, distributed systems, probability, and Machine Learning fundamentals.</p>
+    </div>
+    <div class="featured-blog-action">
+        <a class="featured-blog-btn" href="an_artichoke_of_algorithm.html">Read the Artichoke &rarr;</a>
+    </div>
 </div>
 
-<div class="grid-container" style="grid-template-columns: 1fr 1fr; gap: 30px;">
-    
-<div class="grid-item" style="text-align: center; padding: 40px 20px;">
-    <img src="images/broken_egg.jpg" alt="Broken Anda" width="250">
-    <h3>The Broken Anda</h3>
-    <p style="font-style: italic;">Thoughts, opinions, and social commentary.</p>
-    <p>A collection of my musings on politics, society, and the human experience.</p>
-    <a href="broken_anda.html" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #333; color: #fff; text-decoration: none; border-radius: 5px;">Read Broken Anda</a>
-</div>
+<p class="medium-note">
+    <span>Read my former blog on Medium. In this blog, I share my thoughts and opinions on several social, technical, and political issues.</span>
+    <a href="https://medium.com/@arghyab" title="Medium (@arghyab)"><img src="images/medium.png" alt="Medium" width="30" height="20"></a>
+</p>
 
-<div class="grid-item" style="text-align: center; padding: 40px 20px;">
-    <img src="images/artichoke.jpg" alt="Artichoke of Algorithm" width="250">
-    <h3>An Artichoke of Algorithm</h3>
-    <p style="font-style: italic;">Peeling back the layers of Computer Science.</p>
-    <p>Deep dives into algorithm engineering, distributed systems, probability, and Machine Learning fundamentals.</p>
-    <a href="an_artichoke_of_algorithm.html" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #333; color: #fff; text-decoration: none; border-radius: 5px;">Read the Artichoke</a>
-</div>
-</div>
-
-<h2>Articles for fun (Flavors of my life)</h2>
+<h2 id="articles-for-fun">Articles for fun (Flavors of my life)<a class="section-anchor" href="#articles-for-fun" aria-label="Link to Articles for fun section">#</a></h2>
 <div class="grid-container">
     <div class="grid-item">
         <b>Interesting problems</b><br>
@@ -177,7 +314,7 @@
     </div>
 </div>
 
-<h2>Collaborators/Co-authors/References</h2>
+<h2 id="collaborators">Collaborators/Co-authors/References<a class="section-anchor" href="#collaborators" aria-label="Link to Collaborators section">#</a></h2>
 <ul style="list-style-type:square">
     <li><a href="https://www3.cs.stonybrook.edu/~bender/">Prof. Michael A. Bender</a> (Stony Brook), Ph.D. (Harvard)</li>
     <li><a href="https://www3.cs.stonybrook.edu/~rezaul/">Prof. Rezaul A. Chowdhury</a> (Stony Brook), Ph.D. (UT Austin)</li>
@@ -194,3 +331,5 @@
 </ul>
 
 </main>
+</body>
+</html>

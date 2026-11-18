@@ -5,6 +5,30 @@
     <title>An Artichoke of Algorithm | Arghya Bhattacharya</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/jpg" href="images/artichoke.jpg">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Subtle clickable '#' anchor on section headings */
+        h2[id] {
+            scroll-margin-top: 24px;
+        }
+        h2[id] .section-anchor {
+            margin-left: 8px;
+            color: #9aa0a6;
+            text-decoration: none;
+            font-weight: 400;
+            opacity: 0;
+            transition: opacity 0.15s ease, color 0.15s ease;
+        }
+        h2[id]:hover .section-anchor,
+        h2[id] .section-anchor:focus {
+            opacity: 1;
+        }
+        h2[id] .section-anchor:hover {
+            color: #4285F4;
+        }
+    </style>
 </head>
 <body class="artichoke-bg">
 
@@ -21,8 +45,25 @@
             <p>Peeling back the complex layers of computer science, one concept at a time.</p>
         </div>
 
-        <h2>C++ Guides</h2>
-        <hr class="category-divider">
+        <div class="tech-post-list">
+
+            <article class="tech-post">
+                <div class="code-teaser">
+                    <code>erdos_dist = 3;</code>
+                </div>
+                <div class="tech-post-content">
+                    <h3><a href="blogs/an_artichoke_of_algorithm/blog_erdos_number_3.html" style="text-decoration: none; color: #333;">Three Hops to Paul Erdős: My Erdős Number Is 3</a></h3>
+                    <div>
+                        <span class="tech-tag">[Mathematics]</span>
+                        <span class="tech-tag">[Algorithms]</span>
+                        <span style="font-size: 0.85em; color: #666; margin-left: 10px;">🕒 3 min read</span>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <h2 id="cpp-guides">C++ Guides<a class="section-anchor" href="#cpp-guides" aria-label="Link to C++ Guides section">#</a></h2>
         <div class="tech-post-list">
             
             <article class="tech-post">
@@ -53,8 +94,7 @@
 
         </div>
 
-        <h2>Algorithms</h2>
-        <hr class="category-divider">
+        <h2 id="algorithms">Algorithms<a class="section-anchor" href="#algorithms" aria-label="Link to Algorithms section">#</a></h2>
         <div class="tech-post-list">
 
             <article class="tech-post">
@@ -73,8 +113,7 @@
 
         </div>
 
-        <h2>Systems</h2>
-        <hr class="category-divider">
+        <h2 id="systems">Systems<a class="section-anchor" href="#systems" aria-label="Link to Systems section">#</a></h2>
         <div class="tech-post-list">
 
             <article class="tech-post">
